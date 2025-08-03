@@ -2,6 +2,7 @@
 .env.*.php
 .env.php
 .env
+.env.back
 
 /node_modules
 /public/hot
