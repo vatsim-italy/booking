@@ -39,7 +39,6 @@ services:
 
 volumes:
   bmacdata:
-  app-code:
 
 networks:
   bmacnet:

@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y \
 # Copy Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy Apache config (optional: for clean URLs, Laravel, etc.)
+# Copy Apache config
 COPY ./apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 
 # Set working directory
@@ -35,11 +35,13 @@ WORKDIR /var/www/html
 # Copy app files
 COPY . .
 
-# Copy built assets
+# Copy built frontend assets
 COPY --from=frontend /app/public/ /var/www/html/public/
 
-# Set correct permissions (Apache runs as www-data)
-RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html/storage
+# Ensure Laravel cache paths exist and are writable
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
+    && chown -R www-data:www-data bootstrap storage \
+    && chmod -R 755 bootstrap storage
 
 # Laravel setup
 RUN composer install --no-dev --optimize-autoloader \
