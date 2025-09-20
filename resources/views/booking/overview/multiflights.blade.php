@@ -22,7 +22,22 @@
         <td class="{{ auth()->check() && auth()->user()->use_monospace_font ? 'text-monospace' : '' }}">
             {{ $booking->formatted_callsign }}</td>
         <td class="{{ auth()->check() && auth()->user()->use_monospace_font ? 'text-monospace' : '' }}">
-            {{ $booking->formatted_actype }}</td>
+            @php
+                $codes = array_map('trim', explode(',', $booking->formatted_actype));
+            @endphp
+        
+            @if(count($codes) === 1)
+                {{ $codes[0] }}
+            @else
+                <select name="acType" class="form-control form-control-sm" required>
+                    @foreach($codes as $code)
+                        <option value="{{ $code }}" @selected(old('acType', $booking->acType) == $code)>
+                            {{ $code }}
+                        </option>
+                    @endforeach
+                </select>
+            @endif
+        </td>
         <td>
             {{-- Check if booking has been booked --}}
             @if ($booking->status == \App\Enums\BookingStatus::BOOKED)
