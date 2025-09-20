@@ -17,20 +17,20 @@
                             <x-form-group :label="__('Callsign')">
                                 <strong>{{ $booking->formatted_callsign }}</strong>
                             </x-form-group>
-                    
+
                             <x-form-group :label="__('Aircraft code')">
                                 @php
                                     $codes = array_map('trim', explode(',', $booking->formatted_actype));
                                 @endphp
-                    
+                            
                                 @if(count($codes) === 1)
                                     <strong>{{ $codes[0] }}</strong>
-                                    {{-- Keep value in form for posting --}}
-                                    <input type="hidden" name="acType" value="{{ $codes[0] }}">
+                                    <x-form-input type="hidden" name="acType" value="{{ $codes[0] }}" />
                                 @else
                                     <select name="acType" class="form-control" required>
                                         @foreach($codes as $code)
-                                            <option value="{{ $code }}" @selected(old('acType', $booking->acType) == $code)>
+                                            <option value="{{ $code }}" 
+                                                @selected(old('acType', $booking->acType) == $code || $booking->acType == $code)>
                                                 {{ $code }}
                                             </option>
                                         @endforeach

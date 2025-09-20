@@ -35,17 +35,7 @@
                     </x-form-group>
 
                     <x-form-group :label="__('Aircraft code')">
-                        <strong>
-                            @php
-                                $codes = array_map('trim', explode(',', $booking->formatted_actype));
-                            @endphp
-                            
-                            @if(count($codes) > 4)
-                                {{ __('Choose') }}
-                            @else
-                                {{ $booking->formatted_actype }}
-                            @endif
-                        </strong>
+                        <strong>{{ $booking->acType }}</strong>
                     </x-form-group>
 
                     @if ($booking->event->uses_times)
