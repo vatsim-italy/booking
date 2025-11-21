@@ -178,4 +178,73 @@ class Booking extends Model
 
         return $airports->unique();
     }
+
+    public function aircraftTypeGroup()
+    {
+        return $this->belongsTo(AircraftTypeGroup::class);
+    }
+
+    public function getTurnaroundInfo() {
+        return $this->hasOne(Booking::class, 'callsign', 'turnaroundCS')
+            ->where('event_id', $this->event_id);
+    }
+
+    public function statusBadgeClassForUser(int $currentUserId): string
+    {
+        if ($this->status === BookingStatus::UNASSIGNED) {
+            return 'badge bg-success'; // Free
+        }
+
+        // Someone else booked it
+        if ($this->user_id !== $currentUserId) {
+            return 'badge bg-warning'; // Grey
+        }
+
+        // Reserved/Booked by current user
+        return match($this->status) {
+            BookingStatus::RESERVED => 'badge bg-success',
+            BookingStatus::BOOKED => 'badge bg-success',
+            default => 'badge bg-secondary',
+        };
+    }
+
+    public function statusTextForUser(int $currentUserId): string
+    {
+        if ($this->status === BookingStatus::UNASSIGNED) {
+            return 'Free';
+        }
+
+        if ($this->user_id !== $currentUserId) {
+            return 'Booked by someone else';
+        }
+
+        return match($this->status) {
+            BookingStatus::RESERVED => 'Reserved',
+            BookingStatus::BOOKED => 'Confirmed',
+            default => 'Unknown',
+        };
+    }
+
+    public function getFirstFlightAttribute()
+    {
+        return $this->flights()->with(['airportDep', 'airportArr'])->first();
+    }
+
+    public function getFullRotation(): \Illuminate\Support\Collection
+    {
+        $rotation = collect();
+        $current = $this;
+
+        while ($current) {
+            $rotation->push($current);
+
+            if (!$current->turnaroundCS) {
+                break;
+            }
+
+            $current = Booking::where('callsign', $current->turnaroundCS)->first();
+        }
+
+        return $rotation;
+    }
 }
