@@ -111,7 +111,7 @@
 
 
                         <!-- Turnaround Information -->
-                        @if($fullRotation && $fullRotation->isNotEmpty())
+                        @if($fullRotation && $fullRotation->isNotEmpty() && $fullRotation->count() > 1)
                             <div class="mb-4 p-3 bg-light rounded">
                                 <h6 class="mb-3 border-bottom pb-2">Turnaround Information</h6>
 
