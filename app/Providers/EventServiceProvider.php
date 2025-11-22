@@ -28,6 +28,9 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\BookingDeclined' => [
             'App\Listeners\SendBookingDeclinedNotification',
         ],
+        'App\Events\BookingRequested' => [
+            'App\Listeners\SendBookingRequestedNotification',
+        ],
         'App\Events\EventBulkEmail' => [
             'App\Listeners\SendEventBulkEmailNotification',
         ],

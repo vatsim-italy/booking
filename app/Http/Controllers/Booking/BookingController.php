@@ -6,6 +6,7 @@ use App\Enums\BookingStatus;
 use App\Enums\EventType;
 use App\Events\BookingCancelled;
 use App\Events\BookingConfirmed;
+use App\Events\BookingRequested;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Booking\UpdateBooking;
 use App\Models\Airport;
@@ -128,9 +129,9 @@ class BookingController extends Controller
 
             $booking->user()->associate($request->user());
             $booking->status = BookingStatus::PENDING_APPROVAL;
-
-
             $booking->save();
+
+            event(new BookingRequested($booking));
 
             flashMessage(
                 'info',
