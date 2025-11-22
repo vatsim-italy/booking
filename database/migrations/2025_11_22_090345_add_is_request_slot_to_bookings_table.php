@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->foreignId('aircraft_type_group_id')->nullable()->after('acType')->constrained('aircraft_type_groups');
+            $table->boolean('is_request_slot')->default(false);
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            Schema::dropIfExists('aircraft_type_group_id');
+            Schema::dropIfExists('is_request_slot');
         });
     }
 };

@@ -121,6 +121,8 @@
                                     'route' => $flight->route,
                                     'airline' => $airline,
                                     'fltnum' => $fltnum,
+                                    'orig' => $flight->airportDep->icao,
+                                    'dest' => $flight->airportArr->icao,
                                     'callsign' => $booking->formatted_callsign,
                                 ];
                             @endphp

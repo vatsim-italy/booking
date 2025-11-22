@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Booking;
 
+use App\Events\BookingConfirmed;
+use App\Events\BookingDeclined;
 use Carbon\Carbon;
 use App\Models\Event;
 use App\Models\Flight;
@@ -36,10 +38,10 @@ class BookingAdminController extends AdminController
     public function create(Event $event, Request $request): View
     {
         $bulk = $request->bulk;
-        $airports = Airport::all(['id', 'icao', 'iata', 'name'])->keyBy('id')
+        $airports = Airport::all(['id', 'icao', 'name'])->keyBy('id')
             ->map(function ($airport) {
                 /** @var Airport $airport */
-                return "$airport->icao | $airport->name | $airport->iata";
+                return "$airport->icao | $airport->name";
             });
 
         return view('booking.admin.create', compact('event', 'airports', 'bulk'));
@@ -122,10 +124,10 @@ class BookingAdminController extends AdminController
     public function edit(Booking $booking): View|RedirectResponse
     {
         if ($booking->event->endEvent >= now()) {
-            $airports = Airport::all(['id', 'icao', 'iata', 'name'])->keyBy('id')
+            $airports = Airport::all(['id', 'icao', 'name'])->keyBy('id')
                 ->map(function ($airport) {
                     /** @var Airport $airport */
-                    return "$airport->icao | $airport->name | $airport->iata";
+                    return "$airport->icao | $airport->name";
                 });
             $flight = $booking->flights()->first();
             return view('booking.admin.edit', compact('booking', 'airports', 'flight'));
@@ -328,5 +330,33 @@ class BookingAdminController extends AdminController
         Storage::delete($file);
         flashMessage('success', __('Routes assigned'), __('Routes have been assigned to flights'));
         return to_route('bookings.event.index', $event);
+    }
+
+    public function approve(Booking $booking)
+    {
+        $booking->status = BookingStatus::BOOKED;
+        $booking->save();
+
+        // fire email event etc
+        event(new BookingConfirmed($booking));
+
+        flashMessage('success', 'Request approved!', 'The slot has been confirmed.');
+        return back();
+    }
+
+    public function decline(Booking $booking)
+    {
+        $reason = request()->query('reason');
+
+        $booking->status = BookingStatus::UNASSIGNED; // Make slot available
+        $booking->user()->dissociate();
+        $booking->callsign = null;
+        $booking->acType = null;
+        $booking->save();
+
+        event(new BookingDeclined($booking, $reason));
+
+        flashMessage('info', 'Request declined', 'The slot has been freed and is now available.');
+        return back();
     }
 }

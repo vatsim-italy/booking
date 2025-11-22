@@ -31,6 +31,44 @@
                             }
                         });
                     });
+
+                    $('.decline-booking').on('click', function (e) {
+                        e.preventDefault();
+
+                        const url = $(this).attr('href'); // your GET route
+
+                        Swal.fire({
+                            title: 'Decline booking?',
+                            text: 'Optional: provide a reason for decline.',
+                            input: 'text',
+                            inputPlaceholder: 'Reason for decline...',
+                            inputAttributes: {
+                                autocapitalize: 'off'
+                            },
+                            showCancelButton: true,
+                            confirmButtonText: 'Decline',
+                            cancelButtonText: 'Cancel',
+                            icon: 'warning'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                let finalUrl = url;
+
+                                if (result.value) {
+                                    const param = encodeURIComponent(result.value);
+                                    finalUrl += (url.includes('?') ? '&' : '?') + 'reason=' + param;
+                                }
+
+                                Swal.fire({
+                                    title: 'Declining booking...',
+                                    allowOutsideClick: false,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                        window.location.href = finalUrl;
+                                    }
+                                });
+                            }
+                        });
+                    });
                 </script>
             @endpush
             <a href="{{ route('admin.bookings.create',$event) }}" class="btn btn-primary"><i class="fa fa-plus"></i>

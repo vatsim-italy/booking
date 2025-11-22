@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int $id
  * @property string|null $uuid
  * @property int $event_id
+ * @property string|null $turnaroundCS
+ * @property boolean $is_request_slot
  * @property BookingStatus $status
  * @property bool $is_editable
  * @property int|null $user_id
@@ -73,6 +75,7 @@ class Booking extends Model
         'is_editable' => 'boolean',
         'has_already_received_final_information_email' => 'boolean',
         'final_information_email_sent_at' => 'datetime',
+        'is_request_slot' => 'boolean',
     ];
 
     /**

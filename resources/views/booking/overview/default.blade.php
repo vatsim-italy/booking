@@ -1,3 +1,28 @@
+<div class="modal fade" id="declineModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" id="declineForm" action="">
+            @csrf
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Decline Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <label class="form-label">Reason for decline (optional)</label>
+                    <textarea name="reason" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Decline</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
 <thead>
     <tr>
         <th scope="row">From</th>
@@ -47,44 +72,50 @@
             <td class="{{ auth()->check() && auth()->user()->use_monospace_font ? 'text-monospace' : '' }}">
                 {{ $booking->formatted_actype }}</td>
             <td>
-                {{-- Check if booking has been booked --}}
                 @if ($booking->status == \App\Enums\BookingStatus::BOOKED)
-                    {{-- Check if booking has been booked by current user --}}
                     @if (auth()->check() && $booking->user_id == auth()->id())
-                        <a href="{{ route('bookings.show', $booking) }}" class="btn btn-info">My
-                            booking</a>
+                        <a href="{{ route('bookings.show', $booking) }}" class="btn btn-info">
+                            My booking
+                        </a>
                     @else
                         <button class="btn btn-dark disabled">
                             Booked [{{ $booking->user->id }}]
                         </button>
                     @endif
-                @elseif($booking->status === \App\Enums\BookingStatus::RESERVED)
-                    {{-- Check if a booking has been reserved --}}
+
+                @elseif ($booking->status === \App\Enums\BookingStatus::RESERVED)
                     @can('update', $booking)
                         {{-- Check if a booking has been reserved by current user --}}
-                        <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-info">My
-                            Reservation</a>
+                        <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-info">
+                            My reservation
+                        </a>
                     @else
                         <button class="btn btn-dark disabled">
                             Reserved
                             {{ auth()->check() && auth()->user()->isAdmin ? '[' . $booking->user->pic . ']' : '' }}</button>
                     @endcan
+                @elseif ($booking->status === \App\Enums\BookingStatus::PENDING_APPROVAL)
+                    <button class="btn btn-dark disabled">
+                        Pending approval
+                    </button>
                 @else
-                    @if (auth()->check())
-                        {{-- Check if user is logged in --}}
-                        @if ($booking->event->startBooking <= now() && $booking->event->endBooking >= now())
-                            {{-- Check if user already has a booking --}}
-                            @if (
-                                $booking->event->multiple_bookings_allowed ||
-                                    auth()->user()->bookings->where('event_id', $booking->event->id)->isEmpty())
-                                {{-- Check if user already has a booking, and only 1 is allowed --}}
-                                <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-success">BOOK
-                                    NOW</a>
+                    {{-- Available bookings --}}
+                    @if(auth()->check())
+                        @if($booking->event->startBooking <= now() && $booking->event->endBooking >= now())
+                            @if($booking->event->multiple_bookings_allowed || auth()->user()->bookings->where('event_id', $booking->event->id)->isEmpty())
+                                <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-success">BOOK NOW</a>
                             @else
-                                <i class="text-danger">You already have a booking</i>
+                                <span class="text-danger">
+                        <i class="fas fa-exclamation-circle me-1"></i>You already have a booking
+                    </span>
                             @endif
                         @else
-                            <button class="btn btn-danger">Not available</button>
+                            <span class="status-badge me-2" style="background-color: rgba(108, 117, 125, 0.1); color: #6c757d; border: 1px solid rgba(108, 117, 125, 0.2);">
+                    <i class="fas fa-ban me-1"></i>Not Available
+                </span>
+                            <button class="btn btn-danger btn-sm" disabled>
+                                <i class="fas fa-times"></i> Closed
+                            </button>
                         @endif
                     @else
                         <a href="{{ route('login', ['booking' => $booking]) }}" class="btn btn-info">Click here to
@@ -447,69 +478,76 @@
                                                         @if ($booking->status == \App\Enums\BookingStatus::BOOKED)
                                                             @if (auth()->check() && $booking->user_id == auth()->id())
                                                                 <span class="status-badge badge-booked me-2">
-                                                    <i class="fas fa-check-circle me-1"></i>My Booking
-                                                </span>
+                <i class="fas fa-check-circle me-1"></i>My Booking
+            </span>
                                                                 <a href="{{ route('bookings.show', $booking) }}" class="btn btn-info btn-sm">
                                                                     <i class="fas fa-eye"></i> View
                                                                 </a>
                                                             @else
                                                                 <span class="status-badge badge-booked me-2">
-                                                    <i class="fas fa-user-check me-1"></i>Booked
-                                                </span>
+                <i class="fas fa-user-check me-1"></i>Booked
+            </span>
                                                                 <button class="btn btn-dark btn-sm" disabled>
                                                                     [{{ $booking->user->id }}]
                                                                 </button>
                                                             @endif
-                                                        @elseif($booking->status === \App\Enums\BookingStatus::RESERVED)
+
+                                                        @elseif ($booking->status === \App\Enums\BookingStatus::RESERVED)
                                                             @can('update', $booking)
                                                                 <span class="status-badge badge-reserved me-2">
-                                                    <i class="fas fa-clock me-1"></i>My Reservation
-                                                </span>
+                <i class="fas fa-clock me-1"></i>My Reservation
+            </span>
                                                                 <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-info btn-sm">
                                                                     <i class="fas fa-edit"></i> Edit
                                                                 </a>
                                                             @else
                                                                 <span class="status-badge badge-reserved me-2">
-                                                    <i class="fas fa-user-clock me-1"></i>Reserved
-                                                </span>
+                <i class="fas fa-user-clock me-1"></i>Reserved
+            </span>
                                                                 <button class="btn btn-dark btn-sm" disabled>
                                                                     {{ auth()->check() && auth()->user()->isAdmin ? '[' . $booking->user->pic . ']' : '' }}
                                                                 </button>
                                                             @endcan
+
+                                                        @elseif ($booking->status === \App\Enums\BookingStatus::PENDING_APPROVAL)
+                                                            <span class="status-badge badge-warning me-2">
+            <i class="fas fa-hourglass-half me-1"></i>Pending Approval
+        </span>
+
                                                         @else
-                                                            @if (auth()->check())
-                                                                @if ($booking->event->startBooking <= now() && $booking->event->endBooking >= now())
-                                                                    @if ($booking->event->multiple_bookings_allowed || auth()->user()->bookings->where('event_id', $booking->event->id)->isEmpty())
+                                                            {{-- Available bookings --}}
+                                                            @if(auth()->check())
+                                                                @if($booking->event->startBooking <= now() && $booking->event->endBooking >= now())
+                                                                    @if($booking->event->multiple_bookings_allowed || auth()->user()->bookings->where('event_id', $booking->event->id)->isEmpty())
                                                                         <span class="status-badge badge-available me-2">
-                                                            <i class="fas fa-plane me-1"></i>Available
-                                                        </span>
+                                                                            <i class="fas fa-plane me-1"></i>Available
+                                                                        </span>
                                                                         <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-success btn-sm">
                                                                             <i class="fas fa-bookmark"></i> BOOK NOW
                                                                         </a>
                                                                     @else
                                                                         <span class="text-danger">
-                                                            <i class="fas fa-exclamation-circle me-1"></i>You already have a booking
-                                                        </span>
+                                                                            <i class="fas fa-exclamation-circle me-1"></i>You already have a booking
+                                                                        </span>
                                                                     @endif
                                                                 @else
                                                                     <span class="status-badge me-2" style="background-color: rgba(108, 117, 125, 0.1); color: #6c757d; border: 1px solid rgba(108, 117, 125, 0.2);">
-                                                        <i class="fas fa-ban me-1"></i>Not Available
-                                                    </span>
+                    <i class="fas fa-ban me-1"></i>Not Available
+                </span>
                                                                     <button class="btn btn-danger btn-sm" disabled>
                                                                         <i class="fas fa-times"></i> Closed
                                                                     </button>
                                                                 @endif
                                                             @else
                                                                 <span class="status-badge badge-available me-2">
-                                                    <i class="fas fa-plane me-1"></i>Available
-                                                </span>
+                <i class="fas fa-plane me-1"></i>Available
+            </span>
                                                                 <a href="{{ route('login', ['booking' => $booking]) }}" class="btn btn-info btn-sm">
                                                                     <i class="fas fa-sign-in-alt"></i> Login to Book
                                                                 </a>
                                                             @endif
                                                         @endif
-                                                    </td>
-                                                    @if (auth()->check() && auth()->user()->isAdmin && $event->endEvent >= now())
+                                                    </td>                                                    @if (auth()->check() && auth()->user()->isAdmin && $event->endEvent >= now())
                                                         <td data-label="Admin Actions">
                                                             <div class="admin-actions">
                                                                 <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-info btn-sm">
@@ -584,25 +622,32 @@
                 @endif
             </td>
             @if (auth()->check() && auth()->user()->isAdmin && $event->endEvent >= now())
-                <td><a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-info"><i
-                            class="fa fa-edit"></i> Edit</a>
-                </td>
-                <td>
-                    <form action="{{ route('admin.bookings.destroy', $booking) }}" method="post">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-danger delete-booking"><i class="fas fa-trash"></i> Delete
-                        </button>
-                    </form>
-                </td>
-                <td>
-                    @if ($booking->user_id)
-                        <a href="mailto:{{ $booking->user->email }}" style="color: white;">
-                            <button class="btn btn-info">
-                                <i class="fas fa-envelope"></i> Send E-mail [{{ $booking->user->email }}]
-                            </button>
+                <td data-label="Admin Actions">
+                    <div class="admin-actions">
+                        @if($booking->status === \App\Enums\BookingStatus::PENDING_APPROVAL)
+                            <a href="{{ route('admin.bookings.approve', $booking) }}" class="btn btn-success btn-sm">
+                                <i class="fa fa-check"></i> Approve
+                            </a>
+                            <a href="{{ route('admin.bookings.decline', $booking) }}" class="btn btn-danger btn-sm decline-booking">
+                                Decline
+                            </a>
+                        @endif
+                        <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-info btn-sm">
+                            <i class="fa fa-edit"></i> Edit
                         </a>
-                    @endif
+                        <form action="{{ route('admin.bookings.destroy', $booking) }}" method="post" class="d-inline">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-danger btn-sm delete-booking">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                        @if ($booking->user_id)
+                            <a href="mailto:{{ $booking->user->email }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-envelope"></i> Email [{{ $booking->user->email }}]
+                            </a>
+                        @endif
+                    </div>
                 </td>
             @endif
         </tr>
