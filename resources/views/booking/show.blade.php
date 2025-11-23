@@ -76,7 +76,7 @@
                                 <x-form-group :label="__('ADEP')">
                                     <strong>{{ $flight->airportDep->icao }}</strong>
                                     <small class="text-muted d-block">
-                                        {{ $flight->airportDep->name }} ({{ $flight->airportDep->iata }})
+                                        {{ $flight->airportDep->name }}
                                     </small>
                                 </x-form-group>
                             </div>
@@ -86,7 +86,7 @@
                                 <x-form-group :label="__('ADES')">
                                     <strong>{{ $flight->airportArr->icao }}</strong>
                                     <small class="text-muted d-block">
-                                        {{ $flight->airportArr->name }} ({{ $flight->airportArr->iata }})
+                                        {{ $flight->airportArr->name }}
                                     </small>
                                 </x-form-group>
                             </div>

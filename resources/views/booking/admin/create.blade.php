@@ -28,6 +28,16 @@
                             @endslot
                         </x-form-group>
 
+                        <x-form-group name="is_request_slot" :label="__('Request slot?')" inline>
+                            <x-form-radio name="is_request_slot" value="0" :label="__('No')" required />
+                            <x-form-radio name="is_request_slot" value="1" :label="__('Yes')" required />
+                            @slot('help')
+                                <small class="form-text text-muted">
+                                    {{ __('Choose if you want the booking to be requested and then manually verified by a staff member (Callsign, Aircraft Code, DEP or ARR airport editable by users).') }}
+                                </small>
+                            @endslot
+                        </x-form-group>
+
                         @if (!$bulk)
                             <x-form-input name="callsign" :label="__('Callsign')" maxlength="7" />
                             <x-form-input name="acType" :label="__('Aircraft code')" minlength="3" maxlength="4" />
@@ -84,6 +94,15 @@
                         @endif
 
                         <x-form-textarea name="notes" :label="__('Notes')" />
+
+                        @if (!$bulk)
+                            <x-form-group name="turnaroundCS" maxlength="7" inline>
+                                <x-form-input name="turnaroundCS" :label="__('Turnaround Callsign')"  />
+                                <small class="form-text text-muted">
+                                    {{ __('When flight is part of a turnaround, put here the next/return callsign flight. Last of rotation must be left empty.') }}
+                                </small>
+                            </x-form-group>
+                        @endif
 
                         <x-form-submit>
                             @if ($bulk)

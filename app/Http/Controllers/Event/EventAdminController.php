@@ -62,6 +62,7 @@ class EventAdminController extends AdminController
             'dep',
             'arr',
             'image_url',
+            'mail',
             'description'
         ));
         $event->fill([

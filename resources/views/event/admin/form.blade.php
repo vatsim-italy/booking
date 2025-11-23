@@ -101,6 +101,8 @@
 
                         <x-form-input name="image_url" :label="__('Image URL')" placeholder="https://example.org" />
 
+                        <x-form-input name="mail" :label="__('Event mail')" placeholder="urberealops@vatita.net" />
+
                         <x-form-textarea name="description" :label="__('Description')" class="tinymce" />
 
                         <x-form-submit>

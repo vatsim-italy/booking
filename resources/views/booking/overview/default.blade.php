@@ -105,17 +105,10 @@
                             @if($booking->event->multiple_bookings_allowed || auth()->user()->bookings->where('event_id', $booking->event->id)->isEmpty())
                                 <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-success">BOOK NOW</a>
                             @else
-                                <span class="text-danger">
-                        <i class="fas fa-exclamation-circle me-1"></i>You already have a booking
-                    </span>
+                                <a class="btn btn-danger">You already have a booking</a>
                             @endif
                         @else
-                            <span class="status-badge me-2" style="background-color: rgba(108, 117, 125, 0.1); color: #6c757d; border: 1px solid rgba(108, 117, 125, 0.2);">
-                    <i class="fas fa-ban me-1"></i>Not Available
-                </span>
-                            <button class="btn btn-danger btn-sm" disabled>
-                                <i class="fas fa-times"></i> Closed
-                            </button>
+                            <a class="btn btn-danger">Closed</a>
                         @endif
                     @else
                         <a href="{{ route('login', ['booking' => $booking]) }}" class="btn btn-info">Click here to

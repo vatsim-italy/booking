@@ -90,6 +90,8 @@ class BookingAdminController extends AdminController
                 'is_editable' => $request->is_editable,
                 'callsign' => $request->callsign,
                 'acType' => $request->acType,
+                'is_request_slot' => $request->is_request_slot,
+                'turnaroundCS' => $request->turnaroundCS,
             ]);
 
             $booking->event()->associate($request->id)->save();
@@ -148,6 +150,8 @@ class BookingAdminController extends AdminController
             'is_editable' => $request->is_editable,
             'callsign' => $request->callsign,
             'acType' => $request->acType,
+            'is_request_slot' => $request->is_request_slot,
+            'turnaroundCS' => $request->turnaroundCS,
             'final_information_email_sent_at' => null
         ]);
 
