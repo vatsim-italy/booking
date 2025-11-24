@@ -28,12 +28,12 @@
                             @endslot
                         </x-form-group>
 
-                        <x-form-group name="is_request_slot" :label="__('Request slot?')" inline>
+                        <x-form-group name="is_request_slot" :label="__('Reserved slot?')" inline>
                             <x-form-radio name="is_request_slot" value="0" :label="__('No')" required />
                             <x-form-radio name="is_request_slot" value="1" :label="__('Yes')" required />
                             @slot('help')
                                 <small class="form-text text-muted">
-                                    {{ __('Choose if you want the booking to be requested and then manually verified by a staff member (Callsign, Aircraft Code, DEP or ARR airport editable by users).') }}
+                                    {{ __('Choose if you want the booking to be reserved and then manually verified by a staff member (Callsign, Aircraft Code, DEP or ARR airport editable by users).') }}
                                 </small>
                             @endslot
                         </x-form-group>

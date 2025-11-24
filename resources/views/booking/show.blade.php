@@ -107,6 +107,12 @@
                         </div>
                     </div>
 
+                    @component('components.turnaround', [
+                        'fullRotation' => $fullRotation,
+                        'booking' => $booking
+                    ])
+                    @endcomponent
+
                     <!-- Dispatch Options -->
                     <div class="mb-4">
                         <x-form-group :label="__('Flight Planning')">

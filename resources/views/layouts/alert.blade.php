@@ -3,7 +3,7 @@
         <script>
             Swal.fire({
                 title: '{{ session('title') }}',
-                text: '{{ session('text') }}',
+                html: `{!! session('text') !!}`,
                 icon: '{{ session('type') }}'
             })
         </script>

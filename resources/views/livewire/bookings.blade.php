@@ -69,6 +69,41 @@
                             }
                         });
                     });
+
+                    function applyFilters() {
+                        const depFilter = $('#depFilter').val()?.toUpperCase();
+                        const arrFilter = $('#arrFilter').val()?.toUpperCase();
+                        const statusFilter = $('#statusFilter').val();
+                        const reservedToggle = $('#reservedToggle').is(':checked');
+
+                        $('table tbody tr').each(function() {
+                            const rowDep = $(this).data('dep')?.toUpperCase();
+                            const rowArr = $(this).data('arr')?.toUpperCase();
+                            const rowStatus = $(this).data('status')?.toString();
+                            const rowReserved = $(this).data('reserved-type') === 1;
+
+                            let show = true;
+                            if (statusFilter && rowStatus !== statusFilter) show = false;
+                            if (depFilter && rowDep !== depFilter) show = false;
+                            if (arrFilter && rowArr !== arrFilter) show = false;
+                            if (reservedToggle && rowReserved !== reservedToggle) show = false;
+
+                            $(this).toggle(show);
+                        });
+                    }
+
+                    $(document).on('input change', '#depFilter, #arrFilter, #statusFilter', applyFilters);
+                    $(document).on('change', '#reservedToggle', applyFilters);
+                    $(document).on('click', '#resetFilters', function() {
+                        $('#depFilter').val('');
+                        $('#arrFilter').val('');
+                        $('#statusFilter').val('');
+                        $('#reservedToggle').prop('checked', false);
+                        applyFilters();
+                    });
+
+                    // Reapply filters after Livewire re-render
+                    document.addEventListener('livewire:update', applyFilters);
                 </script>
             @endpush
             <a href="{{ route('admin.bookings.create',$event) }}" class="btn btn-primary"><i class="fa fa-plus"></i>
@@ -81,7 +116,50 @@
         @endif
     </p>
     @include('layouts.alert')
-    @if($event->startBooking <= now() || auth()->check() && auth()->user()->isAdmin)
+    <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+        <!-- Status filter using Blade component -->
+
+        <select name="status" placeholder="Choose Status" class="custom-select form-select-sm w-auto mr-1" id="statusFilter">
+            <option value="" disabled="" selected="selected">
+                Choose Status
+            </option>
+            <option value="">
+                All Status
+            </option>
+            <option value="0">
+                Available
+            </option>
+            <option value="1">
+                Reserved
+            </option>
+            <option value="2">
+                Booked / My Booking
+            </option>
+            <option value="3">
+                Pending Approval
+            </option>
+        </select>
+
+        <!-- Departure filter -->
+        <input type="text" id="depFilter" class="form-control w-auto mr-1" placeholder="Departure ICAO">
+
+        <!-- Arrival filter -->
+        <input type="text" id="arrFilter" class="form-control w-auto mr-1" placeholder="Arrival ICAO">
+
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="reservedToggle">
+            <label class="form-check-label mr-1" for="reservedToggle">
+                Show Reserved
+            </label>
+        </div>
+
+        <!-- Reset button -->
+        <button type="button" id="resetFilters" class="btn btn-secondary">RESET</button>
+    </div>
+
+
+
+@if($event->startBooking <= now() || auth()->check() && auth()->user()->isAdmin)
         Flights available: {{ strval($total - $booked) }} / {{ $total }}
         <table class="table table-hover table-responsive">
             @if($event->event_type_id == \App\Enums\EventType::MULTIFLIGHTS->value)

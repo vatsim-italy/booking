@@ -30,8 +30,9 @@ class BookingController extends Controller
             return view('booking.show_multiflights', compact('booking'));
         }
         $flight = $booking->flights->first();
+        $fullRotation = $booking->getFullRotation();
 
-        return view('booking.show', compact('booking', 'flight'));
+        return view('booking.show', compact('booking', 'flight', 'fullRotation'));
     }
 
     public function edit(Booking $booking): View|RedirectResponse
@@ -84,7 +85,7 @@ class BookingController extends Controller
 
         // Check booking window
         if ($booking->event->startBooking > now()) {
-            return $this->redirectWithMessage('danger', 'Danger', 'Bookings aren\'t open yet. They will open at '.$booking->event->startBooking->format('d-m-Y Hi').'z', $booking);
+            return $this->redirectWithMessage('danger', 'Danger', "Bookings aren\'t open yet. They will open at ".$booking->event->startBooking->format('d-m-Y Hi').'z', $booking);
         }
 
         if ($booking->event->endBooking < now()) {
