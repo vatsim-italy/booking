@@ -81,6 +81,8 @@ class User extends Authenticatable
     protected $casts = [
         'isAdmin' => 'boolean',
         'use_monospace_font' => 'boolean',
+        'is_active_atc' => 'boolean',
+        'is_visiting_atc' => 'boolean',
         'airport_view' => AirportView::class,
     ];
 

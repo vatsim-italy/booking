@@ -9,6 +9,7 @@ use App\Models\Booking;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 
 class LoginController extends Controller
@@ -135,6 +136,10 @@ class LoginController extends Controller
         if ($token->getExpires() !== null) {
             $account->token_expires = $token->getExpires();
         }
+        
+        $api_data = $this->getATCStatus($data['cid']);
+        $account->is_active_atc   = $api_data['atc_active'];
+        $account->is_visiting_atc = $api_data['is_visiting'];
 
         $account->save();
         auth()->loginUsingId($data['cid'], true);
@@ -148,5 +153,36 @@ class LoginController extends Controller
         activity()->log('Logout');
         auth()->logout();
         return to_route('home');
+    }
+
+    protected function getATCStatus($cid)
+    {
+        $data = [
+            'atc_active' => false,
+            'is_visiting' => false,
+        ];
+
+        try {
+            $response = Http::withToken(env('VATITA_API_TOKEN'))
+                ->timeout(5) // max 5 seconds
+                ->get('https://training.vatita.net/api/users', [
+                    'include' => ['allUsers', 'endorsements'],
+                ])
+                ->throw(); // will throw exception on 4xx/5xx
+
+            $users = $response->json()['data'] ?? [];
+            $vatitaUser = collect($users)->firstWhere('id', \intval($cid));
+
+            if ($vatitaUser) {
+                $visiting = $vatitaUser['endorsements']['visiting'] ?? null;
+                $data['atc_active'] = $vatitaUser['atc_active'] ?? false;
+                $data['is_visiting'] = \is_array($visiting) && \count($visiting) > 0;
+            }
+        } catch (\Throwable $e) {
+            // Log error but continue
+            \Log::warning("VATITA API unavailable: " . $e->getMessage());
+        }
+
+        return $data;
     }
 }
