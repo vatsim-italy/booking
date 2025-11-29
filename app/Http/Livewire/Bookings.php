@@ -41,22 +41,14 @@ class Bookings extends Component
                 'flights.airportDep',
                 'flights.airportArr',
             ])
-            ->withCount('flights')
-            ->leftJoin('flights', 'bookings.id', '=', 'flights.booking_id')
-            ->leftJoin('airports as dep_airport', 'flights.dep', '=', 'dep_airport.id')
-            ->leftJoin('airports as arr_airport', 'flights.arr', '=', 'arr_airport.id')
-            ->select('bookings.*')
-            ->groupBy('bookings.id')
-            ->orderByRaw(`
-                MIN(
-                    CASE
-                        WHEN dep_airport.icao = ? THEN flights.ctot
-                        WHEN arr_airport.icao = ? THEN flights.eta
-                        ELSE flights.ctot
-                    END
-                ) ASC
-            `, ['LIPZ', 'LIPZ'])
-            ->get();
+            ->get()
+            ->sortBy(function($booking) {
+                return $booking->flights->map(function($f) {
+                    if ($f->airportDep->icao === 'LIPZ') return $f->ctot;
+                    if ($f->airportArr->icao === 'LIPZ') return $f->eta;
+                    return $f->ctot;
+                })->min();
+            });
         } else {
             abort_unless(auth()->check() && auth()->user()->isAdmin, 404);
         }
