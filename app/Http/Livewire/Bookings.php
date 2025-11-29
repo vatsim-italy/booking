@@ -34,26 +34,29 @@ class Bookings extends Component
         // @TODO Check should actually be in a policy
         if ($this->event->is_online || auth()->check() && auth()->user()->isAdmin) {
             $this->bookings = $this->event->bookings()
-    ->with([
-        'event',
-        'user',
-        'flights',
-        'flights.airportDep',
-        'flights.airportArr',
-    ])
-    ->withCount('flights')
-    ->leftJoin('flights', 'bookings.id', '=', 'flights.booking_id')
-    ->select('bookings.*')
-    ->groupBy('bookings.id')
-    ->orderByRaw(`MIN(
-            CASE 
-                WHEN flights.dep_airport_id = ? THEN flights.ctot
-                WHEN flights.arr_airport_id = ? THEN flights.eta
-                ELSE flights.ctot
-            END
-        ) ASC
-    `, ['LIPZ', 'LIPZ'])
-    ->get();
+            ->with([
+                'event',
+                'user',
+                'flights',
+                'flights.airportDep',
+                'flights.airportArr',
+            ])
+            ->withCount('flights')
+            ->leftJoin('flights', 'bookings.id', '=', 'flights.booking_id')
+            ->leftJoin('airports as dep_airport', 'flights.dep', '=', 'dep_airport.id')
+            ->leftJoin('airports as arr_airport', 'flights.arr', '=', 'arr_airport.id')
+            ->select('bookings.*')
+            ->groupBy('bookings.id')
+            ->orderByRaw(`
+                MIN(
+                    CASE
+                        WHEN dep_airport.icao = ? THEN flights.ctot
+                        WHEN arr_airport.icao = ? THEN flights.eta
+                        ELSE flights.ctot
+                    END
+                ) ASC
+            `, ['LIPZ', 'LIPZ'])
+            ->get();
         } else {
             abort_unless(auth()->check() && auth()->user()->isAdmin, 404);
         }
