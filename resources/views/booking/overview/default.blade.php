@@ -70,7 +70,7 @@
             <td class="{{ auth()->check() && auth()->user()->use_monospace_font ? 'text-monospace' : '' }}">
                 <span class="text-nowrap">
                     {{ $booking->formatted_callsign }}&nbsp;
-                    @if ($booking->is_request_slot)
+                    @if ($booking->is_request_slot && $booking->formatted_callsign)
                         <i class="fas fa-star text-info ms-1 align-middle" title="Turnaround available"></i>
                     @endif
                     @if ($booking->turnaroundCS)

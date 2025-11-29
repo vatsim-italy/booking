@@ -149,7 +149,7 @@
         <div class="form-check">
             <input class="form-check-input" type="checkbox" value="" id="reservedToggle">
             <label class="form-check-label mr-1" for="reservedToggle">
-                Show Reserved
+                Custom Only
             </label>
         </div>
 
