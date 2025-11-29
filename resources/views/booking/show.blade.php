@@ -130,6 +130,11 @@
                                     'orig' => $flight->airportDep->icao,
                                     'dest' => $flight->airportArr->icao,
                                     'callsign' => $booking->formatted_callsign,
+                                    'date' => $flight->ctot ? \Carbon\Carbon::parse($flight->ctot)->format('dMy') : null,
+                                    'steh'    => $flight->ctot ? \Carbon\Carbon::parse($flight->ctot)->format('H') : null,
+                                    'stem'    => $flight->ctot ? \Carbon\Carbon::parse($flight->ctot)->format('i') : null,
+                                    'deph'    => $flight->ctot ? \Carbon\Carbon::parse($flight->ctot)->format('H') : null,
+                                    'depm'    => $flight->ctot ? \Carbon\Carbon::parse($flight->ctot)->format('i') : null,
                                 ];
                             @endphp
 
