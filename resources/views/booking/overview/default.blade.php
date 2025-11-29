@@ -28,10 +28,11 @@
         <th scope="row">From</th>
         <th scope="row">To</th>
         @if ($event->uses_times)
-            <th scope="row"><abbr title="Calculated Take Off Time">CTOT</abbr></th>
-            <th scope="row"><abbr title="Estimated Time of Arrival">ETA</abbr></th>
+            <th scope="row"><abbr title="Scheduled Take Off Time">STD</abbr></th>
+            <th scope="row"><abbr title="Scheduled Time of Arrival">STA</abbr></th>
         @endif
-        <th scope="row">Callsign</th>
+        <th scope="row">Callsign 
+        </th>
         <th scope="row">Aircraft</th>
         <th scope="row">Book | Available until {{ $event->endBooking->format('d-m-Y H:i') }}z</th>
         @if (auth()->check() && auth()->user()->isAdmin && $event->endEvent >= now())
@@ -69,6 +70,9 @@
             <td class="{{ auth()->check() && auth()->user()->use_monospace_font ? 'text-monospace' : '' }}">
                 <span class="text-nowrap">
                     {{ $booking->formatted_callsign }}&nbsp;
+                    @if ($booking->is_request_slot)
+                        <i class="fas fa-star text-info ms-1 align-middle" title="Turnaround available"></i>
+                    @endif
                     @if ($booking->turnaroundCS)
                         <i class="fas fa-sync-alt text-info ms-1 align-middle" title="Turnaround available"></i>
                     @endif

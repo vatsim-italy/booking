@@ -55,14 +55,14 @@
                             <div class="row mb-4">
                                 @if($flight->ctot)
                                     <div class="col-md-6">
-                                        <x-form-group :label="__('CTOT')">
+                                        <x-form-group :label="__('STD')">
                                             <strong>{{ $flight->formatted_ctot }}</strong>
                                         </x-form-group>
                                     </div>
                                 @endif
                                 @if($flight->eta)
                                     <div class="col-md-6">
-                                        <x-form-group :label="__('ETA')">
+                                        <x-form-group :label="__('STA')">
                                             <strong>{{ $flight->formatted_eta }}</strong>
                                         </x-form-group>
                                     </div>

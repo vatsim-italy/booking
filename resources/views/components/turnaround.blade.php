@@ -41,7 +41,7 @@
 
                 @if($turnaround->first_flight && $turnaround->first_flight->ctot)
                     <div class="col-md-4">
-                        <x-form-group :label="__('CTOT')">
+                        <x-form-group :label="__('STD')">
                             <strong>{{ $turnaround->first_flight->ctot ? \Carbon\Carbon::parse($turnaround->first_flight->ctot)->format('H:i') : '--:--' }}</strong>
                         </x-form-group>
                     </div>
