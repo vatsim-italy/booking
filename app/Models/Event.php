@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property \Illuminate\Support\Carbon $endEvent
  * @property \Illuminate\Support\Carbon $startBooking
  * @property \Illuminate\Support\Carbon $endBooking
+ * @property \Illuminate\Support\Carbon $preBooking
  * @property bool $import_only
  * @property bool $uses_times
  * @property bool $multiple_bookings_allowed

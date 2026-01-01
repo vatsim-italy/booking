@@ -25,16 +25,20 @@ class BookingPolicy
             return false;
         }
 
-        if ($user->is_preaccess) {
-            return now()->lte($event->endBooking);
-        }
+        $now = now();
 
-        if (! now()->between($event->startBooking, $event->endBooking)) {
+        // Determine the effective booking start
+        $startBooking = ($user->is_preaccess && $event->preBooking)
+            ? $event->preBooking
+            : $event->startBooking;
+
+        // Check if current time is within booking window
+        if (! $now->between($startBooking, $event->endBooking)) {
             return false;
         }
 
-        if (
-            ! $event->multiple_bookings_allowed &&
+        // Check if multiple bookings are allowed
+        if (! $event->multiple_bookings_allowed &&
             $user->bookings->where('event_id', $event->id)->isNotEmpty()
         ) {
             return false;
