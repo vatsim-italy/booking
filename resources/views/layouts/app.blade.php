@@ -32,6 +32,9 @@
         <script src="{{ mix('js/alpine.js') }}" defer></script>
         <script src="{{ mix('js/tinymce.js') }}" defer></script>
     @endif
+    @if (request()->routeIs('atc*'))
+        <script src="{{ mix('js/fullcalendar.js') }}"></script>
+    @endif
 </head>
 
 <body>

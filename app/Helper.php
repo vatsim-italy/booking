@@ -6,6 +6,13 @@ use Illuminate\Support\Collection;
 if (!function_exists('flashMessage')) {
     function flashMessage($type, $title, $text): void
     {
+        //if type is danger or Danger, change to error
+        //if is Warning, set to warning
+        if (strtolower($type) === 'danger') {
+            $type = 'error';
+        } elseif (strtolower($type) === 'warning') {
+            $type = 'warning';
+        }
         session()->flash('type', $type);
         session()->flash('title', $title);
         session()->flash('text', $text);

@@ -7,7 +7,6 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">My settings</div>
-
                 <div class="card-body">
                     <x-form :action="route('user.saveSettings')" method="PATCH">
                         @bind($user)

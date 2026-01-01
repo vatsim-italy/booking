@@ -159,7 +159,7 @@
 
 
 
-@if($event->startBooking <= now() || auth()->check() && auth()->user()->isAdmin)
+@if($event->startBooking <= now() || auth()->check() && (auth()->user()->isAdmin || auth()->user()->is_preaccess))
         Flights available: {{ strval($total - $booked) }} / {{ $total }}
         <table class="table table-hover table-responsive">
             @if($event->event_type_id == \App\Enums\EventType::MULTIFLIGHTS->value)

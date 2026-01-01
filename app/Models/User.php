@@ -83,6 +83,7 @@ class User extends Authenticatable
         'use_monospace_font' => 'boolean',
         'is_active_atc' => 'boolean',
         'is_visiting_atc' => 'boolean',
+        'is_preaccess' => 'boolean',
         'airport_view' => AirportView::class,
     ];
 
@@ -134,5 +135,10 @@ class User extends Authenticatable
         ]);
 
         return $token;
+    }
+
+    public function availability()
+    {
+        return $this->hasMany(Availability::class, 'user_id');
     }
 }

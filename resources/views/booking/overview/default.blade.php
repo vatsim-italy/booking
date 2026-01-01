@@ -110,32 +110,43 @@
                 @else
                     {{-- Available bookings --}}
                     @if(auth()->check())
-                        @if($booking->event->startBooking <= now() && $booking->event->endBooking >= now())
-                            @if($booking->event->multiple_bookings_allowed || auth()->user()->bookings->where('event_id', $booking->event->id)->isEmpty())
-                                <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-success">BOOK NOW</a>
-                            @else
-                                <a href="{{ route('bookings.show', $booking) }}" class="btn btn-danger">You already have a booking</a>
-                            @endif
+                        @can('book', $booking)
+                            <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-success">
+                                BOOK NOW
+                            </a>
                         @else
-                            <a href="{{ route('bookings.show', $booking) }}" class="btn btn-danger">Closed</a>
-                        @endif
+                            @if(! $booking->event->multiple_bookings_allowed && auth()->user()->bookings->where('event_id', $booking->event->id)->isNotEmpty())
+                                <a href="{{ route('bookings.show', $booking) }}" class="btn btn-danger">
+                                    You already have a booking
+                                </a>
+                            @else
+                                <a href="{{ route('bookings.show', $booking) }}" class="btn btn-danger">
+                                    Closed
+                                </a>
+                            @endif
+                        @endcan
                     @else
-                        <a href="{{ route('login', ['booking' => $booking]) }}" class="btn btn-info">Click here to
-                            login</a><!DOCTYPE html>
+                        <a href="{{ route('login', ['booking' => $booking]) }}" class="btn btn-info">
+                            Click here to login
+                        </a>
                     @endif
                 @endif
             </td>
             @if (auth()->check() && auth()->user()->isAdmin && $event->endEvent >= now())
                 <td data-label="Admin Actions">
                     <div class="admin-actions">
-                        @if($booking->status === \App\Enums\BookingStatus::PENDING_APPROVAL)
+                        @can('approve', $booking)
                             <a href="{{ route('admin.bookings.approve', $booking) }}" class="btn btn-success btn-sm">
-                                <i class="fa fa-check"></i> Approve
+                                Approve
                             </a>
-                            <a href="{{ route('admin.bookings.decline', $booking) }}" class="btn btn-danger btn-sm decline-booking">
+                        @endcan
+
+                        @can('decline', $booking)
+                            <a href="{{ route('admin.bookings.decline', $booking) }}" class="btn btn-danger btn-sm">
                                 Decline
                             </a>
-                        @endif
+                        @endcan
+                        
                         <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-info btn-sm">
                             <i class="fa fa-edit"></i> Edit
                         </a>

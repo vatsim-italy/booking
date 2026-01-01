@@ -10,6 +10,39 @@ class BookingPolicy
 {
     use HandlesAuthorization;
 
+    public function before(User $user, string $ability)
+    {
+        if ($user->isAdmin) {
+            return true;
+        }
+    }
+
+    public function book(User $user, Booking $booking): bool
+    {
+        $event = $booking->event;
+
+        if ($booking->user_id) {
+            return false;
+        }
+
+        if ($user->is_preaccess) {
+            return now()->lte($event->endBooking);
+        }
+
+        if (! now()->between($event->startBooking, $event->endBooking)) {
+            return false;
+        }
+
+        if (
+            ! $event->multiple_bookings_allowed &&
+            $user->bookings->where('event_id', $event->id)->isNotEmpty()
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Determine whether the user can view the booking.
      *
@@ -91,5 +124,15 @@ class BookingPolicy
     public function cancel(User $user, Booking $booking)
     {
         return $user->id === $booking->user_id;
+    }
+
+    public function approve(User $user, Booking $booking): bool
+    {
+        return $booking->status === \App\Enums\BookingStatus::PENDING_APPROVAL;
+    }
+
+    public function decline(User $user, Booking $booking): bool
+    {
+        return $booking->status === \App\Enums\BookingStatus::PENDING_APPROVAL;
     }
 }
