@@ -40,7 +40,7 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -165,7 +165,7 @@ events: [
 const overlapping = calendar.getEvents()
     .filter(ev => ev.extendedProps.editable && ev.extendedProps.id !== info.event.extendedProps.id)
     .some(ev => info.event.start < ev.end && info.event.end > ev.start);
-    
+
             if(overlapping){
                 return Swal.fire("Overlap", "This slot overlaps with an existing one!", "warning");
             }
