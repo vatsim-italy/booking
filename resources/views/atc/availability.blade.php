@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const formattedEventsJSON = @json($events);
     const formattedEvents = formattedEventsJSON.map(event => ({
         id: null, 
+        editable: false,
         title: event.name,
         start: event.startEvent,
         end: event.endEvent,
