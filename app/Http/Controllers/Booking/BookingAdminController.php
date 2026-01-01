@@ -215,9 +215,9 @@ class BookingAdminController extends AdminController
     public function destroy(Booking $booking): RedirectResponse
     {
         if ($booking->event->endEvent >= now()) {
-            if (!empty($booking->user)) {
+            if ($booking->user && $booking->user->exists) {
                 event(new BookingDeleted($booking->event, $booking->user));
-            }
+            } 
             $booking->delete();
             flashMessage('success', 'Booking deleted!', __('Booking has been deleted.'));
             return to_route('bookings.event.index', $booking->event);
