@@ -102,6 +102,7 @@ class Event extends Model
         'endEvent' => 'datetime',
         'startBooking' => 'datetime',
         'endBooking' => 'datetime',
+        'preBooking' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

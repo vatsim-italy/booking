@@ -20,6 +20,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property string $name_last
  * @property string $email
  * @property bool $isAdmin
+ * @property bool $is_preaccess
  * @property AirportView $airport_view
  * @property bool $use_monospace_font
  * @property string|null $remember_token
