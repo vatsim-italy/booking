@@ -135,18 +135,6 @@
             @if (auth()->check() && auth()->user()->isAdmin && $event->endEvent >= now())
                 <td data-label="Admin Actions">
                     <div class="admin-actions">
-                        @can('approve', $booking)
-                            <a href="{{ route('admin.bookings.approve', $booking) }}" class="btn btn-success btn-sm">
-                                Approve
-                            </a>
-                        @endcan
-
-                        @can('decline', $booking)
-                            <a href="{{ route('admin.bookings.decline', $booking) }}" class="btn btn-danger btn-sm">
-                                Decline
-                            </a>
-                        @endcan
-                        
                         <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-info btn-sm">
                             <i class="fa fa-edit"></i> Edit
                         </a>

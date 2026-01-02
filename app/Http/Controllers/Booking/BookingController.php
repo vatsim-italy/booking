@@ -72,8 +72,6 @@ class BookingController extends Controller
                 return $this->redirectWithMessage('danger', 'Warning', 'This request slot has already been taken by another user.', $booking);
             }
             $flight = $booking->flights->first();
-
-            return view('booking.request_reserved_slot', compact('booking', 'flight', 'airports'));
         }
 
 
@@ -85,6 +83,11 @@ class BookingController extends Controller
         flashMessage('info', __('Slot reserved'), __('Slot remains reserved until :time', [
             'time' => $booking->updated_at->addMinutes(10)->format('Hi').'z',
         ]));
+
+        if ($booking->is_request_slot) {
+            return view('booking.request_reserved_slot', compact('booking', 'flight', 'airports'));
+        }
+
 
         return $this->renderBookingView($booking, $fullRotation);
     }
@@ -113,19 +116,6 @@ class BookingController extends Controller
 
             $flight->save();
 
-            $booking->user()->associate($request->user());
-            $booking->status = BookingStatus::PENDING_APPROVAL;
-            $booking->save();
-
-            event(new BookingRequested($booking));
-
-            flashMessage(
-                'info',
-                'Request submitted!',
-                'Your slot request is awaiting admin approval.'
-            );
-
-            return to_route('bookings.event.index', $booking->event);
         }
 
         // This check should actually be in the policy, but is now here as a quick fix
