@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Booking;
 
-use App\Events\BookingConfirmed;
-use App\Events\BookingDeclined;
 use Carbon\Carbon;
 use App\Models\Event;
 use App\Models\Flight;
 use App\Models\Airport;
 use App\Models\Booking;
+use Illuminate\Log\Logger;
 use Illuminate\View\View;
 use App\Enums\BookingStatus;
 use Illuminate\Http\Request;
@@ -336,31 +335,19 @@ class BookingAdminController extends AdminController
         return to_route('bookings.event.index', $event);
     }
 
-    public function approve(Booking $booking)
+    public function showEventAvailability(Event $event, Request $request)
     {
-        $booking->status = BookingStatus::BOOKED;
-        $booking->save();
+        $query = $event->availabilities()->with('user');
+        
+        // Optional filter by rating
+        if ($request->filled('rating')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('rating', $request->rating);
+            });
+        }
 
-        // fire email event etc
-        event(new BookingConfirmed($booking));
+        $availabilities = $query->orderBy('start')->get();
 
-        flashMessage('success', 'Request approved!', 'The slot has been confirmed.');
-        return back();
-    }
-
-    public function decline(Booking $booking)
-    {
-        $reason = request()->query('reason');
-
-        $booking->status = BookingStatus::UNASSIGNED; // Make slot available
-        $booking->user()->dissociate();
-        $booking->callsign = null;
-        $booking->acType = null;
-        $booking->save();
-
-        event(new BookingDeclined($booking, $reason));
-
-        flashMessage('info', 'Request declined', 'The slot has been freed and is now available.');
-        return back();
+        return view('booking.admin.availability', compact('event', 'availabilities'));
     }
 }

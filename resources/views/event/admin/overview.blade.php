@@ -83,6 +83,10 @@
                     <a href="{{ route('admin.events.email.form', $event) }}" class="btn btn-primary m-1"><i
                             class="fa fa-envelope"></i> {{ __('Send mail to all') }}</a>&nbsp;
 
+                        
+                    <a href="{{ route('admin.booking.admin.availabilities', $event) }}" class="btn btn-primary m-1">
+                    {{ __('Show availabilities') }}</a>&nbsp;
+
                     <button class="btn btn-success dropdown-toggle m-1" type="button" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-export"></i> Export</button>
                     <div class="dropdown-menu">

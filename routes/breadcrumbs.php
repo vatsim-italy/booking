@@ -101,6 +101,12 @@ Breadcrumbs::for('admin.events.email.form', function ($trail, $event) {
     $trail->push('Send E-mail', route('admin.events.email.form', $event));
 });
 
+// Home > Admin > Events > [Event] > Show availability
+Breadcrumbs::for('admin.booking.admin.availabilities', function ($trail, $event) {
+    $trail->parent('admin.events.show', $event); // parent is event show page
+    $trail->push('Availabilities', route('admin.booking.admin.availabilities', $event));
+});
+
 // Home (no event found)
 Breadcrumbs::for('bookings.index', function ($trail) {
     $trail->parent('home');

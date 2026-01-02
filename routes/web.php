@@ -79,6 +79,7 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => 'auth.isAdm
         [BookingAdminController::class, 'routeAssign']
     )->name('bookings.routeAssign');
 
+    Route::get('events/{event}/availabilities', [BookingAdminController::class, 'showEventAvailability'])->name('booking.admin.availabilities');
 });
 
 Route::resource('bookings', BookingController::class)->only(['show', 'edit', 'update']);

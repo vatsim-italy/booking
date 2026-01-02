@@ -164,4 +164,17 @@ class Event extends Model
             \App\Enums\EventType::GROUPFLIGHT->value
         ]);
     }
+
+    public function availabilities()
+    {
+        return Availability::with('user')
+            ->where(function ($query) {
+                $query->whereBetween('start', [$this->startEvent, $this->endEvent])
+                    ->orWhereBetween('end', [$this->startEvent, $this->endEvent])
+                    ->orWhere(function ($q) {
+                        $q->where('start', '<=', $this->startEvent)
+                            ->where('end', '>=', $this->endEvent);
+                    });
+            });
+    }
 }
