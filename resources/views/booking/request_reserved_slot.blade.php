@@ -61,12 +61,18 @@
                                     @if ($flight->dep && $flight->airportDep->icao !== 'ZZZZ')
                                         <div class="p-2 border rounded bg-light">
                                             <strong>{{ $flight->airportDep->icao }}</strong>
-                                            <small class="text-muted d-block">
-                                                {{ $flight->airportDep->name }}
-                                            </small>
+                                            <small class="text-muted d-block">{{ $flight->airportDep->name }}</small>
                                         </div>
                                     @else
-                                        <x-form-select name="dep" :options="$airports" :placeholder="__('Choose...')" required />
+                                        <input 
+                                            type="text" 
+                                            name="dep" 
+                                            id="dep" 
+                                            class="form-control" 
+                                            placeholder="{{ __('Search departure...') }}" 
+                                            autocomplete="off"
+                                        />
+                                        <div id="dep-suggestions" class="list-group position-absolute" style="z-index: 1000;"></div>
                                     @endif
                                 </x-form-group>
                             </div>
@@ -77,12 +83,18 @@
                                     @if ($flight->arr && $flight->airportArr->icao !== 'ZZZZ')
                                         <div class="p-2 border rounded bg-light">
                                             <strong>{{ $flight->airportArr->icao }}</strong>
-                                            <small class="text-muted d-block">
-                                                {{ $flight->airportArr->name }}
-                                            </small>
+                                            <small class="text-muted d-block">{{ $flight->airportArr->name }}</small>
                                         </div>
                                     @else
-                                        <x-form-select name="arr" :options="$airports" :placeholder="__('Choose...')" required />
+                                        <input 
+                                            type="text" 
+                                            name="arr" 
+                                            id="arr" 
+                                            class="form-control" 
+                                            placeholder="{{ __('Search destination...') }}" 
+                                            autocomplete="off"
+                                        />
+                                        <div id="arr-suggestions" class="list-group position-absolute" style="z-index: 1000;"></div>
                                     @endif
                                 </x-form-group>
                             </div>
@@ -267,6 +279,7 @@
 
                                 <button type="button"
                                         class="btn btn-danger px-4"
+                                        style="margin-left: 0.75rem;"
                                         onclick="event.preventDefault(); document.getElementById('cancel-form').submit();">
                                     <i class="fas fa-times me-2"></i> Cancel Reservation
                                 </button>
@@ -303,4 +316,54 @@
             </div>
         </div>
     </div>
+@push('scripts')
+<script>
+const airports = @json($airports);
+
+function setupAutocomplete(inputId, suggestionsId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const suggestionsBox = document.getElementById(suggestionsId);
+
+    // Convert object to array once
+    const airportsArray = Object.values(airports);
+
+    input.addEventListener('input', function() {
+        const query = this.value.trim().toUpperCase();
+        if (query.length < 1) {
+            suggestionsBox.innerHTML = '';
+            return;
+        }
+
+        // Filter the array
+        const matches = airportsArray
+            .filter(a => a.icao.startsWith(query) || a.name.toUpperCase().includes(query))
+            .slice(0, 10); // limit to 10 suggestions
+
+        suggestionsBox.innerHTML = matches.map(a => `
+            <button type="button" class="list-group-item list-group-item-action" data-icao="${a.icao}">
+                ${a.display}
+            </button>
+        `).join('');
+
+        suggestionsBox.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                input.value = this.dataset.icao || this.textContent.split(' | ')[0];
+                suggestionsBox.innerHTML = '';
+            });
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !suggestionsBox.contains(e.target)) {
+            suggestionsBox.innerHTML = '';
+        }
+    });
+}
+
+setupAutocomplete('dep', 'dep-suggestions');
+setupAutocomplete('arr', 'arr-suggestions');
+</script>
+@endpush
 @endsection

@@ -63,10 +63,13 @@ class BookingController extends Controller
         $fullRotation = $booking->getFullRotation();
 
         if ($booking->is_request_slot) {
-            $airports = Airport::all(['id', 'icao', 'name'])->keyBy('id')
-                ->map(function ($airport) {
-                    return "$airport->icao | $airport->name";
-                });
+            $airports = Airport::all(['id', 'icao', 'name'])
+            ->keyBy('id')
+            ->map(fn($a) => [
+                'icao' => $a->icao,
+                'name' => $a->name,
+                'display' => "{$a->icao} | {$a->name}"
+            ]);
 
             if ($booking->status !== BookingStatus::UNASSIGNED && $booking->user_id !== $userId) {
                 return $this->redirectWithMessage('danger', 'Warning', 'This request slot has already been taken by another user.', $booking);
@@ -95,24 +98,32 @@ class BookingController extends Controller
     public function update(UpdateBooking $request, Booking $booking): RedirectResponse
     {
         if ($booking->is_request_slot) {
-            // Fill with user-submitted data
-            $booking->fill([
-                'callsign' => $request->callsign,
-                'acType' => $request->acType,
-                'dep' => $request->dep,
-                'arr' => $request->arr,
-            ]);
 
             //update flight data in case it's ZZZZ / Choose
             $flight = $booking->flights->first();
 
             if ($request->filled('dep')) {
-                $flight->dep = $request->dep;
+                // Find airport by ICAO
+                $airport = Airport::where(column: 'icao', operator: $request->dep)->first();
+                if ($airport) {
+                    $flight->dep = $airport->id;
+                }
             }
 
             if ($request->filled('arr')) {
-                $flight->arr = $request->arr;
+                $airport = Airport::where(column: 'icao', operator: $request->arr)->first();
+                if ($airport) {
+                    $flight->arr = $airport->id;
+                }
             }
+
+                        // Fill with user-submitted data
+            $booking->fill([
+                'callsign' => $request->callsign,
+                'acType' => $request->acType,
+                'dep' => $flight->dep,
+                'arr' => $flight->arr,
+            ]);
 
             $flight->save();
 
