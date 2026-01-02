@@ -79,8 +79,6 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => 'auth.isAdm
         [BookingAdminController::class, 'routeAssign']
     )->name('bookings.routeAssign');
 
-    Route::get('bookings/{booking}/approve', [BookingAdminController::class, 'approve'])->name('bookings.approve');
-    Route::get('bookings/{booking}/decline', [BookingAdminController::class, 'decline'])->name('bookings.decline');
 });
 
 Route::resource('bookings', BookingController::class)->only(['show', 'edit', 'update']);
