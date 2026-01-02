@@ -89,6 +89,6 @@ class EventPolicy
             ? $event->preBooking
             : $event->startBooking;
 
-        return $now->between($start, $event->endBooking);
+        return $now->gte($start) && $now->lte($event->endBooking);
     }
 }
