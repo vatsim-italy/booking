@@ -47,6 +47,6 @@ class UpdatePreAccessUsers extends Command
         }
 
         $this->info('Done.');
-        return 0;
+        return Command::SUCCESS;
     }
 }

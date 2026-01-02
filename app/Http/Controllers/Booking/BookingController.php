@@ -228,7 +228,7 @@ class BookingController extends Controller
     {
         $this->authorize('cancel', $booking);
         if ($booking->event->endBooking > now()) {
-            if ($booking->is_editable) {
+            if ($booking->is_editable || $booking->is_request_slot) {
                 $booking->fill([
                     'callsign' => null,
                     'acType' => null,

@@ -71,7 +71,7 @@
                 <span class="text-nowrap">
                     {{ $booking->formatted_callsign }}&nbsp;
                     @if ($booking->is_request_slot && $booking->formatted_callsign)
-                        <i class="fas fa-star text-info ms-1 align-middle" title="Turnaround available"></i>
+                        <i class="fas fa-star text-info ms-1 align-middle" title="Custom slot"></i>
                     @endif
                     @if ($booking->turnaroundCS)
                         <i class="fas fa-sync-alt text-info ms-1 align-middle" title="Turnaround available"></i>
