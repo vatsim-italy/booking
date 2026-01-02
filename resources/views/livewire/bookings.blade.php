@@ -157,19 +157,27 @@
         <button type="button" id="resetFilters" class="btn btn-secondary">RESET</button>
     </div>
 
+@php
+    $user = auth()->user();
 
+    $effectiveStart = ($user && $user->is_preaccess && $event->preBooking)
+        ? $event->preBooking
+        : $event->startBooking;
+@endphp
 
-@if($event->startBooking <= now() || auth()->check() && (auth()->user()->isAdmin || auth()->user()->is_preaccess))
-        Flights available: {{ strval($total - $booked) }} / {{ $total }}
-        <table class="table table-hover table-responsive">
-            @if($event->event_type_id == \App\Enums\EventType::MULTIFLIGHTS->value)
-                @include('booking.overview.multiflights')
-            @else
-                @include('booking.overview.default')
-            @endif
-
-        </table>
-    @else
-        <h3>Bookings will be available at <strong>{{ $event->startBooking->format('d-m-Y H:i') }}z</strong></h3><br>
-    @endif
+@can('bookingOpen', $event)
+    Flights available: {{ $total - $booked }} / {{ $total }}
+    <table class="table table-hover table-responsive">
+        @if($event->event_type_id == \App\Enums\EventType::MULTIFLIGHTS->value)
+            @include('booking.overview.multiflights')
+        @else
+            @include('booking.overview.default')
+        @endif
+    </table>
+@else
+    <h3>
+        Bookings will be available at
+        <strong>{{ $effectiveStart->format('d-m-Y H:i') }}z</strong>
+    </h3>
+@endif
 </div>
