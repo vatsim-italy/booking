@@ -102,10 +102,16 @@
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {{ auth()->user()->fullName }}
+                            @if (auth()->user()->isAdmin)
+                                <span class="fa fa-shield-alt ml-1" title="{{ __('Administrator') }}"></span>
+                            @elseif (auth()->user()->is_preaccess)
+                                <span class="fa fa-user-check ml-1" title="{{ __('Pre-access') }}"></span>
+                            @endif
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item {{ request()->routeIs('atc.show') ? 'active' : '' }}"
-                                href="{{ route('atc.show') }}">{{ __('My availability') }}</a>
+                            @can('report', auth()->user())
+                                 <a class="dropdown-item {{ request()->routeIs('atc.show') ? 'active' : '' }}" href="{{ route('atc.show') }}">{{ __('My availability') }}</a>
+                            @endcan
                             <a class="dropdown-item {{ request()->routeIs('user.settings') ? 'active' : '' }}"
                                 href="{{ route('user.settings') }}">{{ __('My settings') }}</a>
                             <a class="dropdown-item" href="{{ route('logout') }}">{{ __('Log out') }}</a>
