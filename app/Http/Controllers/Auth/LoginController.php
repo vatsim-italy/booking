@@ -137,10 +137,14 @@ class LoginController extends Controller
             $account->token_expires = $token->getExpires();
         }
         
-        $api_data = $this->getATCStatus($data['cid']);
+        /**$api_data = $this->getATCStatus($data['cid']);
         $account->is_active_atc   = $api_data['atc_active'];
         $account->is_visiting_atc = $api_data['is_visiting'];
-
+        */
+        
+        if (!$account->is_preaccess) {
+            $account->is_preaccess = $this->getPreAccessStatus($data['cid']);
+        }
         $account->save();
         auth()->loginUsingId($data['cid'], true);
         activity()->log('Login');
@@ -155,7 +159,7 @@ class LoginController extends Controller
         return to_route('home');
     }
 
-    protected function getATCStatus($cid)
+    protected function getATCStatus($cid): array
     {
         $data = [
             'atc_active' => false,
@@ -167,22 +171,57 @@ class LoginController extends Controller
                 ->timeout(5) // max 5 seconds
                 ->get('https://training.vatita.net/api/users', [
                     'include' => ['allUsers', 'endorsements'],
-                ])
-                ->throw(); // will throw exception on 4xx/5xx
+                ]);
+
+            if (!$response->ok()) {
+                \Log::warning("VATITA API returned non-OK response ({$response->status()}) for CID {$cid}");
+                return $data; // fail-safe
+            }
 
             $users = $response->json()['data'] ?? [];
-            $vatitaUser = collect($users)->firstWhere('id', \intval($cid));
+            $vatitaUser = collect($users)->firstWhere('id', intval($cid));
 
             if ($vatitaUser) {
                 $visiting = $vatitaUser['endorsements']['visiting'] ?? null;
                 $data['atc_active'] = $vatitaUser['atc_active'] ?? false;
-                $data['is_visiting'] = \is_array($visiting) && \count($visiting) > 0;
+                $data['is_visiting'] = is_array($visiting) && count($visiting) > 0;
             }
         } catch (\Throwable $e) {
-            // Log error but continue
-            \Log::warning("VATITA API unavailable: " . $e->getMessage());
+            \Log::warning("VATITA API unavailable for CID {$cid}: " . $e->getMessage());
         }
 
         return $data;
     }
+
+
+    protected function getPreAccessStatus($cid): bool
+    {
+        try {
+            $urlsListResponse = Http::timeout(5)->get('https://cdn.vatita.net/Eventi/bookings_preaccess/index.json');
+            if (!$urlsListResponse->ok()) return false;
+
+            $urls = $urlsListResponse->json();
+        } catch (\Throwable $e) {
+            \Log::warning("Failed to fetch pre-access URLs list: " . $e->getMessage());
+            return false;
+        }
+
+        foreach ($urls as $url) {
+            try {
+                $response = Http::timeout(5)->get($url);
+                if (!$response->ok()) continue;
+
+                $userIds = $response->json(); // ["10000011", ...]
+                if (in_array((string)$cid, $userIds, true)) {
+                    return true;
+                }
+            } catch (\Throwable $e) {
+                \Log::warning("Failed to fetch pre-access data from $url: " . $e->getMessage());
+                continue; // skip this URL, don’t break login
+            }
+        }
+
+        return false;
+    }
+
 }

@@ -12,6 +12,7 @@ class ATCController extends Controller
     public function __invoke(Request $request): View
     {
         $user = auth()->user();
+        $this->authorize('report', $user);
 
         // Load availability from DB
         $userAvailability = auth()->user()->availability->map(fn($slot) => [

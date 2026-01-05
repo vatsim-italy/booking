@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\EventCleanupReservationsCommand;
+use App\Console\Commands\UpdateATCStatus;
 use App\Console\Commands\UpdatePreAccessUsers;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -16,7 +17,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         \Bugsnag\BugsnagLaravel\Commands\DeployCommand::class,
-        \App\Console\Commands\UpdatePreAccessUsers::class
+        UpdatePreAccessUsers::class,
+        UpdateATCStatus::class
     ];
 
     /**
@@ -30,6 +32,7 @@ class Kernel extends ConsoleKernel
         $schedule->command(EventCleanupReservationsCommand::class)->everyFiveMinutes();
 
         $schedule->command(UpdatePreAccessUsers::class)->everyThirtyMinutes();
+        $schedule->command(UpdateATCStatus::class)->daily();
 
         $schedule->command('activitylog:clean --force')->daily();
 

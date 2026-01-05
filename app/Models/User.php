@@ -23,6 +23,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property bool $is_preaccess
  * @property AirportView $airport_view
  * @property bool $use_monospace_font
+ * @property bool $is_active_atc
+ * @property bool $is_visiting_atc
  * @property string|null $remember_token
  * @property string|null $access_token
  * @property string|null $refresh_token
