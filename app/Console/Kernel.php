@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel
         $schedule->command(EventCleanupReservationsCommand::class)->everyFiveMinutes();
 
         $schedule->command(UpdatePreAccessUsers::class)->everyThirtyMinutes();
-        $schedule->command(UpdateATCStatus::class)->daily();
+        $schedule->command(UpdateATCStatus::class)->everyTwoHours();
 
         $schedule->command('activitylog:clean --force')->daily();
 

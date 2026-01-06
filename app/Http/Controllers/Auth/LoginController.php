@@ -197,27 +197,46 @@ class LoginController extends Controller
     protected function getPreAccessStatus($cid): bool
     {
         try {
-            $urlsListResponse = Http::timeout(5)->get('https://cdn.vatita.net/Eventi/bookings_preaccess/index.json');
-            if (!$urlsListResponse->ok()) return false;
+            $urlsListResponse = Http::timeout(5)
+                ->acceptJson()
+                ->get('https://cdn.vatita.net/Eventi/bookings_preaccess/index.json');
+
+            if (!$urlsListResponse->ok()) {
+                return false;
+            }
 
             $urls = $urlsListResponse->json();
+
+            if (!is_array($urls)) {
+                \Log::warning('Pre-access index.json returned invalid JSON', [
+                    'body' => $urlsListResponse->body(),
+                ]);
+                return false;
+            }
+
         } catch (\Throwable $e) {
             \Log::warning("Failed to fetch pre-access URLs list: " . $e->getMessage());
             return false;
         }
 
         foreach ($urls as $url) {
+            if (!is_string($url)) {
+                continue;
+            }
+
             try {
-                $response = Http::timeout(5)->get($url);
+                $response = Http::timeout(5)->acceptJson()->get($url);
                 if (!$response->ok()) continue;
 
-                $userIds = $response->json(); // ["10000011", ...]
-                if (in_array((string)$cid, $userIds, true)) {
+                $userIds = $response->json();
+
+                if (!is_array($userIds)) continue;
+
+                if (in_array((string) $cid, $userIds, true)) {
                     return true;
                 }
             } catch (\Throwable $e) {
-                \Log::warning("Failed to fetch pre-access data from $url: " . $e->getMessage());
-                continue; // skip this URL, don’t break login
+                \Log::warning("Failed to fetch pre-access data from {$url}: " . $e->getMessage());
             }
         }
 
