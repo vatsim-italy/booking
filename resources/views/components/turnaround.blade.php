@@ -9,7 +9,7 @@
                     <div class="col-md-4">
                         <x-form-group :label="__('Callsign')">
                             <strong>{{ $turnaround->callsign }}</strong>
-                            <a href="../{{ $turnaround->uuid }}/edit"
+                            <a href="./{{ $turnaround->uuid }}/edit"
                                rel="noreferrer noopener"
                                target="_blank"
                                class="text-decoration-none ms-2">
