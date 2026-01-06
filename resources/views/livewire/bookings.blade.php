@@ -13,6 +13,44 @@
                 class="btn {{ $filter == 'arrivals' ? 'btn-success' : 'btn-primary' }}">Show
                 Arrivals</button>&nbsp;
         @endif
+        @push('scripts')
+        <script>
+            function applyFilters() {
+                const depFilter = $('#depFilter').val()?.toUpperCase();
+                const arrFilter = $('#arrFilter').val()?.toUpperCase();
+                const statusFilter = $('#statusFilter').val();
+                const reservedToggle = $('#reservedToggle').is(':checked');
+
+                $('table tbody tr').each(function() {
+                    const rowDep = $(this).data('dep')?.toUpperCase();
+                    const rowArr = $(this).data('arr')?.toUpperCase();
+                    const rowStatus = $(this).data('status')?.toString();
+                    const rowReserved = $(this).data('reserved-type') === 1;
+
+                    let show = true;
+                    if (statusFilter && rowStatus !== statusFilter) show = false;
+                    if (depFilter && rowDep !== depFilter) show = false;
+                    if (arrFilter && rowArr !== arrFilter) show = false;
+                    if (reservedToggle && rowReserved !== reservedToggle) show = false;
+
+                    $(this).toggle(show);
+                });
+            }
+
+            $(document).on('input change', '#depFilter, #arrFilter, #statusFilter', applyFilters);
+            $(document).on('change', '#reservedToggle', applyFilters);
+            $(document).on('click', '#resetFilters', function() {
+                $('#depFilter').val('');
+                $('#arrFilter').val('');
+                $('#statusFilter').val('');
+                $('#reservedToggle').prop('checked', false);
+                applyFilters();
+            });
+
+            // Reapply filters after Livewire re-render
+            document.addEventListener('livewire:update', applyFilters);
+        </script>
+        @endpush
         @if(auth()->check() && auth()->user()->isAdmin && $event->endBooking >= now())
             @push('scripts')
                 <script>
@@ -70,40 +108,6 @@
                         });
                     });
 
-                    function applyFilters() {
-                        const depFilter = $('#depFilter').val()?.toUpperCase();
-                        const arrFilter = $('#arrFilter').val()?.toUpperCase();
-                        const statusFilter = $('#statusFilter').val();
-                        const reservedToggle = $('#reservedToggle').is(':checked');
-
-                        $('table tbody tr').each(function() {
-                            const rowDep = $(this).data('dep')?.toUpperCase();
-                            const rowArr = $(this).data('arr')?.toUpperCase();
-                            const rowStatus = $(this).data('status')?.toString();
-                            const rowReserved = $(this).data('reserved-type') === 1;
-
-                            let show = true;
-                            if (statusFilter && rowStatus !== statusFilter) show = false;
-                            if (depFilter && rowDep !== depFilter) show = false;
-                            if (arrFilter && rowArr !== arrFilter) show = false;
-                            if (reservedToggle && rowReserved !== reservedToggle) show = false;
-
-                            $(this).toggle(show);
-                        });
-                    }
-
-                    $(document).on('input change', '#depFilter, #arrFilter, #statusFilter', applyFilters);
-                    $(document).on('change', '#reservedToggle', applyFilters);
-                    $(document).on('click', '#resetFilters', function() {
-                        $('#depFilter').val('');
-                        $('#arrFilter').val('');
-                        $('#statusFilter').val('');
-                        $('#reservedToggle').prop('checked', false);
-                        applyFilters();
-                    });
-
-                    // Reapply filters after Livewire re-render
-                    document.addEventListener('livewire:update', applyFilters);
                 </script>
             @endpush
             <a href="{{ route('admin.bookings.create',$event) }}" class="btn btn-primary"><i class="fa fa-plus"></i>
