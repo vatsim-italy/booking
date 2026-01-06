@@ -118,14 +118,11 @@ class LoginController extends Controller
 
     protected function completeLogin($data, $token): User
     {
-        $account = User::updateOrCreate(
-            ['id' => $data['cid']],
-            [
-                'name_first' => $data['first_name'],
-                'name_last' => $data['last_name'],
-                'email' => $data['email'],
-            ]
-        );
+        $account = User::firstOrNew(['id' => $data['cid']]);
+
+        $account->name_first = $data['first_name'];
+        $account->name_last  = $data['last_name'];
+        $account->email      = $data['email'];
 
         if ($token->getToken() !== null) {
             $account->access_token = $token->getToken();
@@ -142,7 +139,7 @@ class LoginController extends Controller
         $account->is_visiting_atc = $api_data['is_visiting'];
         */
         
-        if (!$account->is_preaccess) {
+        if ($account->is_preaccess !== true) {
             $account->is_preaccess = $this->getPreAccessStatus($data['cid']);
         }
         $account->save();
