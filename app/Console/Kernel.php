@@ -18,7 +18,8 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         \Bugsnag\BugsnagLaravel\Commands\DeployCommand::class,
         UpdatePreAccessUsers::class,
-        UpdateATCStatus::class
+        UpdateATCStatus::class,
+        EventCleanupReservationsCommand::class
     ];
 
     /**
