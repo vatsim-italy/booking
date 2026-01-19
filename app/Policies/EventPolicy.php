@@ -81,14 +81,16 @@ class EventPolicy
         return false;
     }
 
-    public function bookingOpen(User $user, Event $event): bool
+    public function bookingOpen(?User $user, Event $event): bool
     {
-        $now = now();
+        $now = now()->utc();
 
-        $start = ($user->is_preaccess && $event->preBooking)
+        $isPreaccess = $user?->is_preaccess === true;
+
+        $start = ($isPreaccess && $event->preBooking)
             ? $event->preBooking
             : $event->startBooking;
 
-        return $now->gte($start) && $now->lte($event->endBooking);
+        return $now->between($start, $event->endBooking);
     }
 }
