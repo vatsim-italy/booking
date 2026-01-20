@@ -30,7 +30,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command(EventCleanupReservationsCommand::class)->everyFiveMinutes();
+        $schedule->command('event:cleanup-reservations')->everyFiveMinutes();
 
         $schedule->command(UpdatePreAccessUsers::class)->everyThirtyMinutes();
         $schedule->command(UpdateATCStatus::class)->everyTwoHours();
