@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Console\Commands\EventCleanupReservationsCommand;
 use App\Console\Commands\UpdateATCStatus;
 use App\Console\Commands\UpdatePreAccessUsers;
+use Event;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -30,7 +31,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('event:cleanup-reservations')->everyFiveMinutes();
+        $schedule->command(EventCleanupReservationsCommand::class)->everyTwoMinutes();
 
         $schedule->command(UpdatePreAccessUsers::class)->everyThirtyMinutes();
         $schedule->command(UpdateATCStatus::class)->everyTwoHours();
