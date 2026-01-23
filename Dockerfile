@@ -50,4 +50,7 @@ RUN composer install --no-dev --optimize-autoloader \
     && php artisan storage:link
 
 EXPOSE 80
-CMD ["apache2-foreground"]
+
+COPY entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
