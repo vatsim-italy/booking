@@ -40,6 +40,12 @@
 <body>
     <div id="app">
         @include('layouts.navbar')
+        @if(now()->lt(\Carbon\Carbon::parse('2026-07-27')))
+        <div class="alert alert-dismissible fade show mb-0 py-1 text-center small" role="alert" style="border-radius:0; background-color:#fff3cd; border-color:#ffe69c; color:#856404;">
+            <i class="fas fa-triangle-exclamation me-1"></i>
+            We are aware of recent issues affecting slot booking. A fix has been deployed and operations appear to be back to normal.
+        </div>
+        @endif
         <main class="py-4">
             <div class="container">
 

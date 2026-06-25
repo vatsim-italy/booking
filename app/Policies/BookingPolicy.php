@@ -21,6 +21,10 @@ class BookingPolicy
     {
         $event = $booking->event;
 
+        if ($booking->user_id === $user->id && $booking->status === \App\Enums\BookingStatus::RESERVED) {
+            return true;
+        }
+
         if ($booking->user_id) {
             return false;
         }

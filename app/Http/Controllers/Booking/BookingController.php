@@ -41,7 +41,7 @@ class BookingController extends Controller
         $user = auth()->user();
 
         if (! $user || ! $user->can('book', $booking)) {
-            if ($booking->user_id) {
+            if ($booking->user_id && $booking->user_id !== $userId) {
                 $message = 'This slot has already been taken.';
             } elseif (
                 ! $booking->event->multiple_bookings_allowed &&
