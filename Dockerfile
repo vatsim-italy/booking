@@ -45,8 +45,6 @@ RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions 
 
 # Laravel setup
 RUN composer install --no-dev --optimize-autoloader \
-    && php artisan config:cache \
-    && php artisan route:cache \
     && php artisan storage:link
 
 EXPOSE 80
