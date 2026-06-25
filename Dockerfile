@@ -48,7 +48,3 @@ RUN composer install --no-dev --optimize-autoloader \
     && php artisan storage:link
 
 EXPOSE 80
-
-COPY entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["entrypoint.sh"]
