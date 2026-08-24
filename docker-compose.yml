@@ -18,6 +18,7 @@ services:
       sh -c "
         php artisan migrate --force &&
         chown -R www-data:www-data storage bootstrap/cache &&
+        (php artisan schedule:work >> storage/logs/schedule.log 2>&1 &) &&
         apache2-foreground
       "
 
