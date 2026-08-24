@@ -44,8 +44,8 @@ class Bookings extends Component
             ->get()
             ->sortBy(function($booking) {
                 return $booking->flights->map(function($f) {
-                    if ($f->airportDep->icao === 'LIPZ') return $f->ctot;
-                    if ($f->airportArr->icao === 'LIPZ') return $f->eta;
+                    if ($f->airportDep->icao === 'LIRN') return $f->ctot;
+                    if ($f->airportArr->icao === 'LIRN') return $f->eta;
                     return $f->ctot;
                 })->min();
             });
