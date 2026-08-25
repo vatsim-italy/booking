@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-md navbar-dark navbar-laravel">
+<nav class="navbar navbar-expand-md navbar-dark navbar-laravel sticky-top">
     <div class="container">
 
         <a class="navbar-brand" href="{{ URL::to('/') }}"><img src="{{ asset('images/division-square.png') }}"
@@ -18,11 +18,11 @@
             <ul class="navbar-nav mr-auto">
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownEvents" role="button" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">
                         {{ __('Events') }}
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownEvents">
                         <a class="dropdown-item" href="{{ url('/') }}">{{ __('Overview') }}</a>
 
                         @if ($navbarEvents->isNotEmpty())
@@ -62,11 +62,11 @@
                     @if (auth()->user()->isAdmin)
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {{ request()->routeIs('admin*') ? 'active' : '' }}"
-                                href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true"
+                                href="#" id="navbarDropdownAdmin" role="button" data-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false">
                                 {{ __('Admin') }}
                             </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
                                 <a class="dropdown-item {{ request()->routeIs('admin.events*') ? 'active' : '' }}"
                                     href="{{ route('admin.events.index') }}">{{ __('Events') }}</a>
                                 <a class="dropdown-item {{ request()->routeIs('admin.eventLinks*') ? 'active' : '' }}"
@@ -99,7 +99,7 @@
                 @else
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {{ auth()->user()->fullName }}
                             @if (auth()->user()->isAdmin)
@@ -108,7 +108,7 @@
                                 <span class="fa fa-user-check ml-1" title="{{ __('Pre-access') }}"></span>
                             @endif
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownUser">
                             @can('report', auth()->user())
                                  <a class="dropdown-item {{ request()->routeIs('atc.show') ? 'active' : '' }}" href="{{ route('atc.show') }}">{{ __('My availability') }}</a>
                             @endcan

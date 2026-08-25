@@ -39,29 +39,35 @@
 
 <body>
     <div id="app">
+        <!-- Skip link (accessibility) -->
+        <a class="sr-only sr-only-focusable position-absolute bg-white p-2"
+            style="z-index: 1080;" href="#main-content">{{ __('Skip to content') }}</a>
+
         @include('layouts.navbar')
         @if(now()->lt(\Carbon\Carbon::parse('2026-07-27')))
-        <div class="alert alert-dismissible fade show mb-0 py-1 text-center small" role="alert" style="border-radius:0; background-color:#fff3cd; border-color:#ffe69c; color:#856404;">
-            <i class="fas fa-triangle-exclamation me-1"></i>
+        <div class="alert alert-dismissible fade show notice-banner mb-0 py-1 text-center small" role="alert">
+            <i class="fas fa-triangle-exclamation mr-1"></i>
             We are aware of recent issues affecting slot booking. A fix has been deployed and operations appear to be back to normal.
         </div>
         @endif
-        <main class="py-4">
+        <main class="py-4" id="main-content" tabindex="-1">
             <div class="container">
 
-                <ol class="breadcrumb">
-                    @foreach (Breadcrumbs::current() as $crumbs)
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        @foreach (Breadcrumbs::current() as $crumbs)
 
-                        @if ($crumbs->url() && !$loop->last)
-                            <li class="breadcrumb-item">
-                                <a href="{{ $crumbs->url() }}">{{ $crumbs->title() }}</a>
-                            </li>
-                        @else
-                            <li class="breadcrumb-item active">{{ $crumbs->title() }}</li>
-                        @endif
+                            @if ($crumbs->url() && !$loop->last)
+                                <li class="breadcrumb-item">
+                                    <a href="{{ $crumbs->url() }}">{{ $crumbs->title() }}</a>
+                                </li>
+                            @else
+                                <li class="breadcrumb-item active" aria-current="page">{{ $crumbs->title() }}</li>
+                            @endif
 
-                    @endforeach
-                </ol>
+                        @endforeach
+                    </ol>
+                </nav>
 
                 @yield('content')
                 @include('layouts.footer')

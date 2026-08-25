@@ -178,7 +178,7 @@
                                                            rel="noreferrer noopener"
                                                            target="_blank"
                                                            class="text-decoration-none d-flex align-items-center">
-                                                            <i class="fas fa-external-link-alt me-2 text-muted" style="font-size: 0.8rem;"></i>
+                                                            <i class="fas fa-external-link-alt mr-2 text-muted" style="font-size: 0.8rem;"></i>
                                                             <span>{{ $link->name ?: $link->type->name }}</span>
                                                         </a>
                                                     </div>
@@ -202,7 +202,7 @@
                                                            rel="noreferrer noopener"
                                                            target="_blank"
                                                            class="text-decoration-none d-flex align-items-center">
-                                                            <i class="fas fa-external-link-alt me-2 text-muted" style="font-size: 0.8rem;"></i>
+                                                            <i class="fas fa-external-link-alt mr-2 text-muted" style="font-size: 0.8rem;"></i>
                                                             <span>{{ $link->name ?: $link->type->name }}</span>
                                                         </a>
                                                     </div>
@@ -226,7 +226,7 @@
                                                    rel="noreferrer noopener"
                                                    target="_blank"
                                                    class="text-decoration-none d-flex align-items-center">
-                                                    <i class="fas fa-external-link-alt me-2 text-muted" style="font-size: 0.8rem;"></i>
+                                                    <i class="fas fa-external-link-alt mr-2 text-muted" style="font-size: 0.8rem;"></i>
                                                     <span>{{ $link->name ?: $link->type->name }}</span>
                                                 </a>
                                             </div>
@@ -263,14 +263,14 @@
                         <!-- Action Buttons -->
                         <div class="d-flex gap-3 mt-4 pt-3 border-top">
                             <x-form-submit class="btn-primary px-4">
-                                <i class="fas fa-check me-2"></i>
+                                <i class="fas fa-check mr-2"></i>
                                 {{ $booking->status === \App\Enums\BookingStatus::RESERVED ? 'Confirm Booking' : 'Update Booking' }}
                             </x-form-submit>
 
                             @if($booking->status === \App\Enums\BookingStatus::RESERVED)
                                 <button type="button" class="btn btn-danger ml-2 px-4"
                                         onclick="event.preventDefault(); document.getElementById('cancel-form').submit();">
-                                    <i class="fas fa-times me-2"></i> Cancel Reservation
+                                    <i class="fas fa-times mr-2"></i> Cancel Reservation
                                 </button>
                             @endif
                         </div>

@@ -24,6 +24,9 @@ $link-hover-color: darken($envColorSecondary, 25%);
 // Bootswatch Flatly
 @import 'bootswatch/dist/flatly/bootswatch';
 
+// UI enhancement layer (see design.md)
+@import 'ui';
+
 .navbar-brand {
     font-weight: 800;
     color: white !important;
@@ -32,6 +35,28 @@ $link-hover-color: darken($envColorSecondary, 25%);
 .navbar-laravel {
     background-color: $envColorPrimary;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+
+.navbar-laravel {
+    background-color: $envColorPrimary;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+
+    .nav-link.active {
+        color: $navbar-dark-active-color !important;
+
+        &::after {
+            content: "";
+            display: block;
+            height: 2px;
+            border-radius: 2px;
+            background-color: $envColorTertiary;
+        }
+    }
+
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 6px 18px rgba(44, 62, 80, 0.18);
+        border-radius: 0.4rem;
+    }
 }
 
 .event-title a {
@@ -48,8 +73,4 @@ $link-hover-color: darken($envColorSecondary, 25%);
         margin-bottom: 10px;
     }
 }
-
-h5 {
-    color: $cyan;
-    text-decoration: underline;
 }

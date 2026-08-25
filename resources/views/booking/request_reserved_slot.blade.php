@@ -180,7 +180,7 @@
                                                            rel="noreferrer noopener"
                                                            target="_blank"
                                                            class="text-decoration-none d-flex align-items-center">
-                                                            <i class="fas fa-external-link-alt me-2 text-muted" style="font-size: 0.8rem;"></i>
+                                                            <i class="fas fa-external-link-alt mr-2 text-muted" style="font-size: 0.8rem;"></i>
                                                             <span>{{ $link->name ?: $link->type->name }}</span>
                                                         </a>
                                                     </div>
@@ -205,7 +205,7 @@
                                                            rel="noreferrer noopener"
                                                            target="_blank"
                                                            class="text-decoration-none d-flex align-items-center">
-                                                            <i class="fas fa-external-link-alt me-2 text-muted" style="font-size: 0.8rem;"></i>
+                                                            <i class="fas fa-external-link-alt mr-2 text-muted" style="font-size: 0.8rem;"></i>
                                                             <span>{{ $link->name ?: $link->type->name }}</span>
                                                         </a>
                                                     </div>
@@ -229,7 +229,7 @@
                                                    rel="noreferrer noopener"
                                                    target="_blank"
                                                    class="text-decoration-none d-flex align-items-center">
-                                                    <i class="fas fa-external-link-alt me-2 text-muted" style="font-size: 0.8rem;"></i>
+                                                    <i class="fas fa-external-link-alt mr-2 text-muted" style="font-size: 0.8rem;"></i>
                                                     <span>{{ $link->name ?: $link->type->name }}</span>
                                                 </a>
                                             </div>
@@ -268,20 +268,20 @@
                             {{-- USER BUTTONS --}}
                             @if($booking->status === \App\Enums\BookingStatus::UNASSIGNED)
                                 <x-form-submit class="btn-primary px-4">
-                                    <i class="fas fa-check me-2"></i> Request Booking
+                                    <i class="fas fa-check mr-2"></i> Request Booking
                                 </x-form-submit>
                             @endif
 
                             @if($booking->status === \App\Enums\BookingStatus::RESERVED)
                                 <x-form-submit class="btn-primary px-4">
-                                    <i class="fas fa-check me-2"></i> Confirm Booking
+                                    <i class="fas fa-check mr-2"></i> Confirm Booking
                                 </x-form-submit>
 
                                 <button type="button"
                                         class="btn btn-danger px-4"
                                         style="margin-left: 0.75rem;"
                                         onclick="event.preventDefault(); document.getElementById('cancel-form').submit();">
-                                    <i class="fas fa-times me-2"></i> Cancel Reservation
+                                    <i class="fas fa-times mr-2"></i> Cancel Reservation
                                 </button>
                             @endif
 
@@ -297,7 +297,7 @@
                             <x-form method="POST" :action="route('admin.bookings.approve', $booking)" class="d-inline">
                                 @csrf
                                 <button class="btn btn-success px-4">
-                                    <i class="fas fa-check me-2"></i> Approve Booking
+                                    <i class="fas fa-check mr-2"></i> Approve Booking
                                 </button>
                             </x-form>
 
@@ -305,7 +305,7 @@
                             <x-form method="POST" :action="route('admin.bookings.decline', $booking)" class="d-inline">
                                 @csrf
                                 <button class="btn btn-danger ml-1 px-4">
-                                    <i class="fas fa-times me-2"></i> Decline
+                                    <i class="fas fa-times mr-2"></i> Decline
                                 </button>
                             </x-form>
                         </div>

@@ -27,11 +27,14 @@
         <div class="col-md-8">
             <div class="card">
                 <!-- Card Header -->
-                <div class="card-header">
+                <div class="card-header d-flex align-items-center justify-content-between">
                     <h5 class="mb-0">
                         {{ $booking->event->name }} |
                         {{ $booking->status == \App\Enums\BookingStatus::BOOKED ? __('My Booking') : __('My Reservation') }}
                     </h5>
+                    <span class="{{ $booking->statusBadgeClassForUser(auth()->id()) }} ml-2 text-nowrap">
+                        {{ $booking->statusTextForUser(auth()->id()) }}
+                    </span>
                 </div>
 
                 <div class="card-body">
@@ -137,12 +140,15 @@
                             @endphp
 
                             <a href="{{ $simbriefUrl . http_build_query($params) }}"
-                               target="_blank"
+                               target="_blank" rel="noreferrer noopener"
                                class="btn btn-outline-primary btn-sm d-inline-flex align-items-center">
 
-                                Open in SimBrief
+                                <i class="fas fa-file-export mr-2" aria-hidden="true"></i>
+                                {{ __('Open in SimBrief') }}
                             </a>
-                            <small class="text-muted d-block mt-1">Pre-filled with your flight details</small>
+                            <small class="text-muted d-block mt-1">
+                                <i class="fas fa-magic mr-1" aria-hidden="true"></i>{{ __('Pre-filled with your flight details') }}
+                            </small>
                         </x-form-group>
                     </div>
 
@@ -179,7 +185,10 @@
 
                     <!-- Airport Links -->
                     <div class="mb-4">
-                        <h6 class="mb-3">Airport Resources</h6>
+                        <div class="section-header">
+                            <i class="fas fa-link" aria-hidden="true"></i>
+                            <h6>{{ __('Airport Resources') }}</h6>
+                        </div>
 
                         <!-- if none of those conditions are met, show N/A-->
                         @if(
@@ -187,50 +196,55 @@
                             (!$booking->event->links->count()) &&
                             (!$flight->arr || !$flight->airportArr->links->count())
                         )
-                            <p class="text-muted">N/A</p>
+                            <p class="text-muted mb-0">N/A</p>
                         @endif
 
                         <div class="row">
                             <!-- Departure Airport Links -->
                             @if($flight->dep && $flight->airportDep->links->count())
-                                <div class="col-md-6">
-                                    <div class="card">
-                                        <div class="card-header py-2">
-                                            <strong>Departure ({{ $flight->airportDep->icao }})</strong>
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <div class="card h-100">
+                                        <div class="card-header py-2 d-flex align-items-center">
+                                            <i class="fas fa-plane-departure text-primary mr-2" aria-hidden="true"></i>
+                                            <strong>{{ __('Departure') }} ({{ $flight->airportDep->icao }})</strong>
                                         </div>
-                                        <div class="card-body py-2">
+                                        <ul class="list-group list-group-flush">
                                             @foreach($flight->airportDep->links as $link)
-                                                <div class="mb-2">
+                                                <li class="list-group-item py-2">
                                                     <a href="{{ $link->url }}"
                                                        rel="noreferrer noopener"
                                                        target="_blank"
                                                        class="text-decoration-none d-flex align-items-center">
-                                                        <i class="fas fa-external-link-alt me-2 text-muted" style="font-size: 0.8rem;"></i>
+                                                        <i class="fas fa-external-link-alt mr-2 text-muted" aria-hidden="true"></i>
                                                         <span>{{ $link->name ?: $link->type->name }}</span>
                                                     </a>
-                                                </div>
+                                                </li>
                                             @endforeach
-                                        </div>
+                                        </ul>
                                     </div>
                                 </div>
                             @endif
 
                             @if($booking->event->links->count())
-                                <div class="col-md-6">
-                                    <div class="card">
-                                        <div class="card-body py-2">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <div class="card h-100">
+                                        <div class="card-header py-2 d-flex align-items-center">
+                                            <i class="fas fa-calendar-alt text-primary mr-2" aria-hidden="true"></i>
+                                            <strong>{{ __('Event Resources') }}</strong>
+                                        </div>
+                                        <ul class="list-group list-group-flush">
                                             @foreach($booking->event->links as $link)
-                                                <div class="mb-2">
+                                                <li class="list-group-item py-2">
                                                     <a href="{{ $link->url }}"
                                                        rel="noreferrer noopener"
                                                        target="_blank"
                                                        class="text-decoration-none d-flex align-items-center">
-                                                        <i class="fas fa-external-link-alt me-2 text-muted" style="font-size: 0.8rem;"></i>
+                                                        <i class="fas fa-external-link-alt mr-2 text-muted" aria-hidden="true"></i>
                                                         <span>{{ $link->name ?: $link->type->name }}</span>
                                                     </a>
-                                                </div>
+                                                </li>
                                             @endforeach
-                                        </div>
+                                        </ul>
                                     </div>
                                 </div>
                             @endif
@@ -238,23 +252,24 @@
                             <!-- Arrival Airport Links -->
                             @if($flight->arr && $flight->airportArr->links->count())
                                 <div class="col-md-6">
-                                    <div class="card">
-                                        <div class="card-header py-2">
-                                            <strong>Arrival ({{ $flight->airportArr->icao }})</strong>
+                                    <div class="card h-100">
+                                        <div class="card-header py-2 d-flex align-items-center">
+                                            <i class="fas fa-plane-arrival text-primary mr-2" aria-hidden="true"></i>
+                                            <strong>{{ __('Arrival') }} ({{ $flight->airportArr->icao }})</strong>
                                         </div>
-                                        <div class="card-body py-2">
+                                        <ul class="list-group list-group-flush">
                                             @foreach($flight->airportArr->links as $link)
-                                                <div class="mb-2">
+                                                <li class="list-group-item py-2">
                                                     <a href="{{ $link->url }}"
                                                        rel="noreferrer noopener"
                                                        target="_blank"
                                                        class="text-decoration-none d-flex align-items-center">
-                                                        <i class="fas fa-external-link-alt me-2 text-muted" style="font-size: 0.8rem;"></i>
+                                                        <i class="fas fa-external-link-alt mr-2 text-muted" aria-hidden="true"></i>
                                                         <span>{{ $link->name ?: $link->type->name }}</span>
                                                     </a>
-                                                </div>
+                                                </li>
                                             @endforeach
-                                        </div>
+                                        </ul>
                                     </div>
                                 </div>
                             @endif
@@ -271,15 +286,15 @@
                     @endif
 
                     <!-- Action Buttons -->
-                    <div class="d-inline-flex mt-4 pl-1 pt-3 border-top">
+                    <div class="d-flex flex-wrap pt-3 mt-4 border-top">
                         @if($booking->is_editable)
-                            <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-primary px-4">
-                                <i class="fas fa-edit me-2"></i>{{ __('Edit Booking') }}
+                            <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-primary px-4 mr-2">
+                                <i class="fas fa-edit mr-2"></i>{{ __('Edit Booking') }}
                             </a>
                         @endif
 
-                        <button class="btn btn-danger px-4 ml-1 cancel-booking" form="cancel-booking">
-                            <i class="fas fa-times me-2"></i>{{ __('Cancel Booking') }}
+                        <button class="btn btn-danger px-4 cancel-booking" form="cancel-booking">
+                            <i class="fas fa-times mr-2"></i>{{ __('Cancel Booking') }}
                         </button>
                     </div>
 

@@ -1,6 +1,15 @@
 <div {{ $refreshInSeconds ? "wire:poll.{$refreshInSeconds}s" : '' }}>
-    <h3>{{ $event->name }} | {{ $filter ? ucfirst($filter) : 'Slot Table' }}</h3>
-    <hr>
+    <div class="page-header">
+        <i class="fas fa-plane-departure page-header-icon"></i>
+        <h3>{{ $event->name }} | {{ $filter ? ucfirst($filter) : 'Slot Table' }}</h3>
+    </div>
+
+    <!-- Livewire refresh indicator -->
+    <div wire:loading class="text-muted small my-1">
+        <span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
+        Updating slots...
+    </div>
+
     <p>
         @if($event->hasOrderButtons())
             <button wire:model="filter" wire:click="filter(null)"
@@ -120,45 +129,59 @@
         @endif
     </p>
     @include('layouts.alert')
-    <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
-        <!-- Status filter using Blade component -->
+    <div class="filter-toolbar">
+        <div class="d-flex flex-wrap align-items-end">
+            <div class="mr-2 mb-2 mb-md-0">
+                <label class="filter-label" for="statusFilter">{{ __('Status') }}</label>
+                <select name="status" class="custom-select custom-select-sm w-auto" id="statusFilter">
+                    <option value="" disabled="" selected="selected">
+                        Choose Status
+                    </option>
+                    <option value="">
+                        All Status
+                    </option>
+                    <option value="0">
+                        Available
+                    </option>
+                    <option value="1">
+                        Reserved
+                    </option>
+                    <option value="2">
+                        Booked / My Booking
+                    </option>
+                    <option value="3">
+                        Pending Approval
+                    </option>
+                </select>
+            </div>
 
-        <select name="status" placeholder="Choose Status" class="custom-select form-select-sm w-auto mr-1" id="statusFilter">
-            <option value="" disabled="" selected="selected">
-                Choose Status
-            </option>
-            <option value="">
-                All Status
-            </option>
-            <option value="0">
-                Available
-            </option>
-            <option value="1">
-                Reserved
-            </option>
-            <option value="2">
-                Booked / My Booking
-            </option>
-            <option value="3">
-                Pending Approval
-            </option>
-        </select>
+            <!-- Departure filter -->
+            <div class="mr-2 mb-2 mb-md-0">
+                <label class="filter-label" for="depFilter">{{ __('Departure') }}</label>
+                <input type="text" id="depFilter" class="form-control form-control-sm w-auto"
+                    placeholder="Departure ICAO" aria-label="Departure ICAO filter">
+            </div>
 
-        <!-- Departure filter -->
-        <input type="text" id="depFilter" class="form-control w-auto mr-1" placeholder="Departure ICAO">
+            <!-- Arrival filter -->
+            <div class="mr-2 mb-2 mb-md-0">
+                <label class="filter-label" for="arrFilter">{{ __('Arrival') }}</label>
+                <input type="text" id="arrFilter" class="form-control form-control-sm w-auto"
+                    placeholder="Arrival ICAO" aria-label="Arrival ICAO filter">
+            </div>
 
-        <!-- Arrival filter -->
-        <input type="text" id="arrFilter" class="form-control w-auto mr-1" placeholder="Arrival ICAO">
+            <div class="form-check mr-2 mb-2 mb-md-0">
+                <input class="form-check-input" type="checkbox" value="" id="reservedToggle">
+                <label class="form-check-label" for="reservedToggle">
+                    Custom Only
+                </label>
+            </div>
 
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="" id="reservedToggle">
-            <label class="form-check-label mr-1" for="reservedToggle">
-                Custom Only
-            </label>
+            <!-- Reset button -->
+            <button type="button" id="resetFilters" class="btn btn-secondary btn-sm"
+                aria-label="Reset filters">
+                <i class="fas fa-undo mr-1"></i>RESET
+            </button>
         </div>
-
-        <!-- Reset button -->
-        <button type="button" id="resetFilters" class="btn btn-secondary">RESET</button>
     </div>
 
 @php
@@ -170,14 +193,18 @@
 @endphp
 
 @can('bookingOpen', $event)
-    Flights available: {{ $total - $booked }} / {{ $total }}
-    <table class="table table-hover table-responsive">
-        @if($event->event_type_id == \App\Enums\EventType::MULTIFLIGHTS->value)
-            @include('booking.overview.multiflights')
-        @else
-            @include('booking.overview.default')
-        @endif
-    </table>
+    <span class="slots-counter">
+        {{ __('Flights available') }}&nbsp;<strong>{{ $total - $booked }}</strong>&nbsp;/&nbsp;{{ $total }}
+    </span>
+    <div class="table-responsive">
+        <table class="table table-hover table-ui">
+            @if($event->event_type_id == \App\Enums\EventType::MULTIFLIGHTS->value)
+                @include('booking.overview.multiflights')
+            @else
+                @include('booking.overview.default')
+            @endif
+        </table>
+    </div>
 @else
     <h3>
         Bookings will be available at

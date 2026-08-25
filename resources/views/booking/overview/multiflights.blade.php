@@ -1,12 +1,12 @@
 <thead>
     <tr>
-        <th scope="row">Flight #1</th>
-        <th scope="row">Flight #2</th>
-        <th scope="row">Callsign</th>
-        <th scope="row">Aircraft</th>
-        <th scope="row">Book | Available until {{ $event->endBooking->format('d-m-Y H:i') }}z</th>
+        <th scope="col">Flight #1</th>
+        <th scope="col">Flight #2</th>
+        <th scope="col">Callsign</th>
+        <th scope="col">Aircraft</th>
+        <th scope="col">Book | Available until {{ $event->endBooking->format('d-m-Y H:i') }}z</th>
         @if (auth()->check() && auth()->user()->isAdmin && $event->endEvent >= now())
-            <th colspan="3" scope="row">Admin actions</th>
+            <th colspan="3" scope="col">Admin actions</th>
         @endif
     </tr>
 </thead>
@@ -98,10 +98,8 @@
             </td>
             <td>
                 @if ($booking->user_id)
-                    <a href="mailto:{{ $booking->user->email }}" style="color: white;">
-                        <button class="btn btn-info">
-                            <i class="fas fa-envelope"></i> Send E-mail [{{ $booking->user->email }}]
-                        </button>
+                    <a href="mailto:{{ $booking->user->email }}" class="btn btn-info">
+                        <i class="fas fa-envelope"></i> Send E-mail [{{ $booking->user->email }}]
                     </a>
                 @endif
             </td>
