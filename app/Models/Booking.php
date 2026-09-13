@@ -236,16 +236,20 @@ class Booking extends Model
     public function getFullRotation(): \Illuminate\Support\Collection
     {
         $rotation = collect();
+        $visited = [];
         $current = $this;
 
-        while ($current) {
+        while ($current && !in_array($current->id, $visited, true)) {
+            $visited[] = $current->id;
             $rotation->push($current);
 
             if (!$current->turnaroundCS) {
                 break;
             }
 
-            $current = Booking::where('callsign', $current->turnaroundCS)->first();
+            $current = Booking::where('callsign', $current->turnaroundCS)
+                ->where('event_id', $current->event_id)
+                ->first();
         }
 
         return $rotation;
