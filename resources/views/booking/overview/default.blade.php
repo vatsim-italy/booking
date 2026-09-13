@@ -122,9 +122,17 @@
                     {{-- Available bookings --}}
                     @if(auth()->check())
                         @can('book', $booking)
-                            <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-success">
-                                BOOK NOW
-                            </a>
+                            @if($booking->event->name === 'Napoli Real Operations'
+                                && $booking->formatted_callsign
+                                && \Illuminate\Support\Str::contains($booking->formatted_callsign, ['WMT', 'WZZ']))
+                                <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-success vwzz-button">
+                                    BOOK NOW
+                                </a>
+                            @else
+                                <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-success">
+                                    BOOK NOW
+                                </a>
+                            @endif
                         @else
                             @if(! $booking->event->multiple_bookings_allowed && auth()->user()->bookings->where('event_id', $booking->event->id)->isNotEmpty())
                                 <a href="{{ route('bookings.show', $booking) }}" class="btn btn-danger">
