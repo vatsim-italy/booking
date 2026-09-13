@@ -24,10 +24,10 @@
                                 href="{{ route('bookings.event.index', $event) }}">{{ $event->name }}</a></h4>
                         <div class="my-2">
                             <span class="meta-chip">
-                                <i class="fas fa-calendar"></i>{{ $event->startEvent->toFormattedDateString() }}
+                                <i class="fas fa-calendar mr-1"></i>{{ $event->startEvent->toFormattedDateString() }}
                             </span>
                             <span class="meta-chip">
-                                <i class="fas fa-clock"></i>{{ $event->startEvent->format('H:i\z') }} -
+                                <i class="fas fa-clock mr-1"></i>{{ $event->startEvent->format('H:i\z') }} -
                                 {{ $event->endEvent->format('H:i\z') }}
                             </span>
                         </div>
