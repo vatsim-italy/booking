@@ -11,7 +11,7 @@
 
     @forelse($events as $event)
         <div class="row event mb-4">
-            <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+            <div class="{{ $events->count() === 1 ? 'col-12' : 'col-xl-6 col-lg-6' }} col-md-12 col-sm-12">
                 <div class="card card-hover event-card">
                     @if ($event->image_url)
                         <a href="{{ route('bookings.event.index', $event) }}">
@@ -47,4 +47,6 @@
             <p class="mb-0">Currently no events scheduled.</p>
         </div>
     @endforelse
+
+    @include('partials.vwzz-popup')
 @endsection
