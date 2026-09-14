@@ -1,50 +1,71 @@
-# Stage 1: Build frontend assets
-FROM node:18-alpine as frontend
+# Stage 1: Build frontend assets with bun
+FROM node:24-alpine AS frontend
 
 WORKDIR /app
-COPY . .
-RUN npm ci
 
+RUN curl -fsSL https://bun.com/install | bash
+ENV PATH="${PATH}:/root/.bun/bin"
+
+# Install deps first for better layer caching
+COPY package.json bun.lockb ./
+RUN bun install
+
+# Copy only what Vite needs to build
+COPY vite.config.mjs ./
 COPY resources/ resources/
 COPY public/ public/
-RUN npm run build
 
+# Theme colors for Sass ($envColor*) — override at build time if needed
+ARG BOOTSTRAP_COLOR_PRIMARY=#2C3E50
+ARG BOOTSTRAP_COLOR_SECONDARY=#95a5a6
+ARG BOOTSTRAP_COLOR_TERTIARY=#18BC9C
+ARG BOOTSTRAP_COLOR_SUCCESS=#18BC9C
+ARG BOOTSTRAP_COLOR_WARNING=#F39C12
+ARG BOOTSTRAP_COLOR_DANGER=#E74C3C
+ENV BOOTSTRAP_COLOR_PRIMARY=$BOOTSTRAP_COLOR_PRIMARY \
+    BOOTSTRAP_COLOR_SECONDARY=$BOOTSTRAP_COLOR_SECONDARY \
+    BOOTSTRAP_COLOR_TERTIARY=$BOOTSTRAP_COLOR_TERTIARY \
+    BOOTSTRAP_COLOR_SUCCESS=$BOOTSTRAP_COLOR_SUCCESS \
+    BOOTSTRAP_COLOR_WARNING=$BOOTSTRAP_COLOR_WARNING \
+    BOOTSTRAP_COLOR_DANGER=$BOOTSTRAP_COLOR_DANGER
 
-# Stage 2: Main application image with Apache and PHP
-FROM php:8.2-apache
+RUN bun run build
 
-# Enable Apache mods
-RUN a2enmod rewrite
+# Stage 2: laravel-base runtime
+FROM ghcr.io/vatsim-italy/laravel-base:latest
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git unzip zip libzip-dev libpng-dev libonig-dev libxml2-dev \
-    libpq-dev libjpeg-dev libfreetype6-dev libicu-dev g++ ca-certificates \
-    && docker-php-ext-install pdo pdo_mysql zip gd mbstring xml bcmath opcache pcntl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+USER root
+WORKDIR /var/www
 
-# Copy Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Install nginx + extensions missing from laravel-base
+RUN apt-get update && apt-get install -y nginx \
+    && rm -rf /var/lib/apt/lists/* \
+    && docker-php-ext-install xml intl opcache
 
-# Copy Apache config
-COPY ./apache/000-default.conf /etc/apache2/sites-available/000-default.conf
+# Install PHP dependencies first (cache layer)
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --prefer-dist \
+    --no-interaction
 
-# Set working directory
-WORKDIR /var/www/html
-
-# Copy app files
+# Copy Laravel app
 COPY . .
 
-# Copy built frontend assets
-COPY --from=frontend /app/public/ /var/www/html/public/
+# Copy built assets
+COPY --from=frontend /app/public/build public/build
 
-# Ensure Laravel cache paths exist and are writable
-RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
-    && chown -R www-data:www-data bootstrap storage \
-    && chmod -R 755 bootstrap storage
+# Laravel permissions
+RUN mkdir -p storage bootstrap/cache \
+    && chown -R www-data:www-data /var/www \
+    && chmod -R 775 storage bootstrap/cache
 
-# Laravel setup
-RUN composer install --no-dev --optimize-autoloader \
-    && php artisan storage:link
+# Copy nginx config
+COPY docker/nginx/default.conf /etc/nginx/sites-available/default
 
-EXPOSE 80
+CMD sh -c "\
+  until php artisan db:monitor; do echo 'Waiting for DB...'; sleep 2; done && \
+  service nginx start && \
+  php artisan schedule:work & \
+  php-fpm -F"

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-forms.alert />
+    @include('components.forms.alert', ['errors' => $errors])
     @push('scripts')
         <script>
             $('.cancel-booking').on('click', function(e) {
@@ -31,83 +31,119 @@
                 <div class="card-body">
 
                     @foreach ($booking->flights as $flight)
-                        <x-form-group>
+                        <div class="form-group">
                             <strong>
                                 {{ __('Leg #:number', ['number' => $loop->iteration]) }}
                             </strong>
-                        </x-form-group>
+                        </div>
                         @if ($booking->event->uses_times)
-                            @if ($flight->ctot)
-                                <x-form-group :label="__('CTOT')">
-                                    <strong>{{ $flight->formatted_ctot }}</strong>
-                                </x-form-group>
+                            <div class="row">
+                                @if ($flight->ctot)
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>{{ __('CTOT') }}</label>
+                                            <p class="form-control-plaintext"><strong>{{ $flight->formatted_ctot }}</strong></p>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if ($flight->eta)
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>{{ __('ETA') }}</label>
+                                            <p class="form-control-plaintext"><strong>{{ $flight->formatted_eta }}</strong></p>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+
+                        <div class="row">
+                            @if ($flight->dep)
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ __('ADEP') }}</label>
+                                        <p class="form-control-plaintext"><strong>{{ $flight->airportDep->icao }} - {{ $flight->airportDep->name }} -
+                                            {{ $flight->airportDep->iata }}</strong></p>
+                                    </div>
+                                </div>
                             @endif
 
-                            @if ($flight->eta)
-                                <x-form-group :label="__('ETA')">
-                                    <strong>{{ $flight->formatted_eta }}</strong>
-                                </x-form-group>
+                            @if ($flight->arr)
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ __('ADES') }}</label>
+                                        <p class="form-control-plaintext"><strong>{{ $flight->airportArr->icao }} - {{ $flight->airportArr->name }} -
+                                            {{ $flight->airportArr->iata }}</strong></p>
+                                    </div>
+                                </div>
                             @endif
-                        @endif
+                        </div>
 
-                        @if ($flight->dep)
-                            <x-form-group :label="__('ADEP')">
-                                <strong>{{ $flight->airportDep->icao }} - {{ $flight->airportDep->name }} -
-                                    {{ $flight->airportDep->iata }}</strong>
-                            </x-form-group>
-                        @endif
-
-                        @if ($flight->arr)
-                            <x-form-group :label="__('ADES')">
-                                <strong>{{ $flight->airportArr->icao }} - {{ $flight->airportArr->name }} -
-                                    {{ $flight->airportArr->iata }}</strong>
-                            </x-form-group>
-                        @endif
-
-                        <x-form-group :label="__('Route')">
-                            <strong>{{ $flight->route ?: '-' }}</strong>
-                        </x-form-group>
+                        <div class="form-group">
+                            <label>{{ __('Route') }}</label>
+                            <p class="form-control-plaintext"><strong>{{ $flight->route ?: '-' }}</strong></p>
+                        </div>
 
                         @if ($booking->event->is_oceanic_event)
-                            <x-form-group :label="__('Track')">
-                                <strong>{{ $flight->oceanicTrack ?: 'T.B.D.' }}</strong>
-                            </x-form-group>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ __('Track') }}</label>
+                                        <p class="form-control-plaintext"><strong>{{ $flight->oceanicTrack ?: 'T.B.D.' }}</strong></p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ __('Oceanic Entry FL') }}</label>
+                                        <p class="form-control-plaintext"><strong>{{ $flight->formatted_oceanicfl }}</strong></p>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <x-form-group :label="__('Oceanic Entry FL')">
-                                <strong>{{ $flight->formatted_oceanicfl }}</strong>
-                            </x-form-group>
-
-                            <x-form-group :label="__('SELCAL')" inline>
-                                <x-form-input name="selcal1" placeholder="AB" minlength="2" maxlength="2" />
-                                <x-form-input name="selcal2" placeholder="CD" minlength="2" maxlength="2" />
-                            </x-form-group>
+                            <div class="form-group">
+                                <label>{{ __('SELCAL') }}</label>
+                                <div class="d-flex flex-row">
+                                    <input type="text" name="selcal1" class="form-control mr-2" placeholder="AB" minlength="2" maxlength="2" style="max-width: 80px;">
+                                    <input type="text" name="selcal2" class="form-control" placeholder="CD" minlength="2" maxlength="2" style="max-width: 80px;">
+                                </div>
+                            </div>
                         @else
                             @if ($flight->oceanicFL)
-                                <x-form-group :label="__('Cruise FL')">
-                                    <strong>{{ $flight->formatted_oceanicfl }}</strong>
-                                </x-form-group>
+                                <div class="form-group">
+                                    <label>{{ __('Cruise FL') }}</label>
+                                    <p class="form-control-plaintext"><strong>{{ $flight->formatted_oceanicfl }}</strong></p>
+                                </div>
                             @endif
                         @endif
 
                         @if ($flight->notes)
-                            <x-form-group :label="__('Notes')">
-                                <strong>{{ $flight->formatted_notes }}</strong>
-                            </x-form-group>
+                            <div class="form-group">
+                                <label>{{ __('Notes') }}</label>
+                                <p class="form-control-plaintext"><strong>{{ $flight->formatted_notes }}</strong></p>
+                            </div>
                         @endif
                         <hr />
                     @endforeach
 
-                    <x-form-group :label="__('Callsign')">
-                        <strong>{{ $booking->formatted_callsign }}</strong>
-                    </x-form-group>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ __('Callsign') }}</label>
+                                <p class="form-control-plaintext"><strong>{{ $booking->formatted_callsign }}</strong></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{ __('Aircraft code') }}</label>
+                                <p class="form-control-plaintext"><strong>{{ $booking->formatted_actype }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
 
-                    <x-form-group :label="__('Aircraft code')">
-                        <strong>{{ $booking->formatted_actype }}</strong>
-                    </x-form-group>
-
-                    <x-form-group inline>
+                    <div class="d-flex flex-row">
                         @if ($booking->is_editable)
-                            <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-primary">
+                            <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-primary mr-2">
                                 {{ __('Edit Booking') }}
                             </a>
                         @endif
@@ -115,13 +151,15 @@
                         <button class="btn btn-danger cancel-booking" form="cancel-booking">
                             {{ __('Cancel Booking') }}
                         </button>
-                    </x-form-group>
+                    </div>
 
-
-
-                    <x-form :action="route('bookings.cancel', $booking)" id="cancel-booking" method="PATCH" style="display: none;"></x-form>
+                    <form action="{{ route('bookings.cancel', $booking) }}" id="cancel-booking" method="POST" style="display: none;">
+                        @csrf
+                        @method('PATCH')
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+

@@ -12,15 +12,8 @@
         "url": "https://www.daveroverts.nl"
     },
     "scripts": {
-        "dev": "npm run development",
-        "development": "mix",
-        "watch": "mix watch",
-        "watch-poll": "mix watch -- --watch-options-poll=1000",
-        "hot": "mix watch --hot",
-        "prod": "npm run build",
-        "production": "npm run build",
-        "build": "mix --production",
-        "semantic-release": "semantic-release"
+        "dev": "vite",
+        "build": "vite build"
     },
     "devDependencies": {
         "@eclass/semantic-release-sentry-releases": "^3.1.0",
@@ -35,21 +28,22 @@
         "bootstrap": "^4.6.2",
         "cross-env": "^7.0.3",
         "jquery": "^3.6.1",
-        "laravel-mix": "^6.0.49",
-        "laravel-mix-purgecss": "^6.0.0",
+        "laravel-vite-plugin": "^3.2.0",
         "popper.js": "^1.16.1",
         "postcss": "^8.4.31",
         "resolve-url-loader": "^5.0.0",
-        "sass": "^1.56.1",
+        "sass": "^1.104.1",
         "sass-loader": "^13.2.0",
         "semantic-release": "^24.0.0",
-        "tinymce": "^7.4.1"
+        "tinymce": "^7.4.1",
+        "vite": "^8.3.0"
     },
     "dependencies": {
         "alpinejs": "^3.10.5",
         "bootswatch": "^4.6.2",
         "flatpickr": "^4.6.13",
-        "sweetalert2": "11.4.8"
+        "sweetalert2": "11.4.8",
+        "vite-plugin-static-copy": "^4.1.1"
     },
     "release": {
         "branches": [

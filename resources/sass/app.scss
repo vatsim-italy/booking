@@ -24,7 +24,7 @@ $link-hover-color: darken($envColorSecondary, 25%);
 // Bootswatch Flatly
 @import 'bootswatch/dist/flatly/bootswatch';
 
-// UI enhancement layer (see design.md)
+// UI enhancement layer
 @import 'ui';
 
 .navbar-brand {

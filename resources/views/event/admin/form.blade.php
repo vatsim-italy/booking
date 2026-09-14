@@ -1,120 +1,233 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-forms.alert />
+    @include('components.forms.alert', ['errors' => $errors])
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">{{ $event->id ? 'Edit' : 'Add new' }} Event</div>
 
                 <div class="card-body">
-                    <x-form :action="$event->id ? route('admin.events.update', $event) : route('admin.events.store')"
-                        :method="$event->id ? 'PATCH' : 'POST'">
-                        @bind($event)
+                    <form action="{{ $event->id ? route('admin.events.update', $event) : route('admin.events.store') }}" method="POST">
+                        @csrf
+                        @if($event->id)
+                            @method('PATCH')
+                        @endif
 
-                        <x-form-group name="is_online" :label="__('Show online?')" inline>
-                            <x-form-radio name="is_online" value="0" :label="__('No')" required />
-                            <x-form-radio name="is_online" value="1" :label="__('Yes')" required />
-                            @slot('help')
-                                <small class="form-text text-muted">
-                                    {{ __("Choose here if you want the event to be reachable by it's generated url") }}
-                                </small>
-                            @endslot
-                        </x-form-group>
+                        {{-- Show online? --}}
+                        <div class="form-group">
+                            <label>{{ __('Show online?') }}</label>
+                            <div class="d-flex flex-row flex-wrap">
+                                <div class="custom-control custom-radio mr-3">
+                                    <input type="radio" name="is_online" id="is_online_no" value="0" class="custom-control-input @error('is_online') is-invalid @enderror" {{ old('is_online', $event->is_online) == 0 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="is_online_no">{{ __('No') }}</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" name="is_online" id="is_online_yes" value="1" class="custom-control-input @error('is_online') is-invalid @enderror" {{ old('is_online', $event->is_online) == 1 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="is_online_yes">{{ __('Yes') }}</label>
+                                </div>
+                            </div>
+                            @include('partials.field-error', ['name' => 'is_online'])
+                            <small class="form-text text-muted">
+                                {{ __("Choose here if you want the event to be reachable by it's generated url") }}
+                            </small>
+                        </div>
 
-                        <x-form-group name="show_on_homepage" :label="__('Show on homepage?')" inline>
-                            <x-form-radio name="show_on_homepage" value="0" :label="__('No')" required />
-                            <x-form-radio name="show_on_homepage" value="1" :label="__('Yes')" required />
-                            @slot('help')
-                                <small class="form-text text-muted">
-                                    {{ __("Choose here if you want to show the event on the homepage. If turned off, the event can only be reached by the url. NOTE: If 'Show Online' is off, the event won't be shown at all") }}
-                                </small>
-                            @endslot
-                        </x-form-group>
+                        {{-- Show on homepage? --}}
+                        <div class="form-group">
+                            <label>{{ __('Show on homepage?') }}</label>
+                            <div class="d-flex flex-row flex-wrap">
+                                <div class="custom-control custom-radio mr-3">
+                                    <input type="radio" name="show_on_homepage" id="show_on_homepage_no" value="0" class="custom-control-input @error('show_on_homepage') is-invalid @enderror" {{ old('show_on_homepage', $event->show_on_homepage) == 0 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="show_on_homepage_no">{{ __('No') }}</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" name="show_on_homepage" id="show_on_homepage_yes" value="1" class="custom-control-input @error('show_on_homepage') is-invalid @enderror" {{ old('show_on_homepage', $event->show_on_homepage) == 1 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="show_on_homepage_yes">{{ __('Yes') }}</label>
+                                </div>
+                            </div>
+                            @include('partials.field-error', ['name' => 'show_on_homepage'])
+                            <small class="form-text text-muted">
+                                {{ __("Choose here if you want to show the event on the homepage. If turned off, the event can only be reached by the url. NOTE: If 'Show Online' is off, the event won't be shown at all") }}
+                            </small>
+                        </div>
 
-                        <x-form-input name="name" :label="__('Name')" required />
+                        {{-- Name --}}
+                        <div class="form-group">
+                            <label for="name">{{ __('Name') }}</label>
+                            <input type="text" name="name" id="name" value="{{ old('name', $event->name) }}" class="form-control @error('name') is-invalid @enderror" required>
+                            @include('partials.field-error', ['name' => 'name'])
+                        </div>
 
-                        <x-form-select name="event_type_id" :label="__('Event type')" :options="$eventTypes"
-                            :placeholder="__('Choose...')" required />
+                        {{-- Event type --}}
+                        <div class="form-group">
+                            <label for="event_type_id">{{ __('Event type') }}</label>
+                            <select name="event_type_id" id="event_type_id" class="custom-select @error('event_type_id') is-invalid @enderror" required>
+                                <option value="">{{ __('Choose...') }}</option>
+                                @foreach($eventTypes as $id => $name)
+                                    <option value="{{ $id }}" {{ old('event_type_id', $event->event_type_id) == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                @endforeach
+                            </select>
+                            @include('partials.field-error', ['name' => 'event_type_id'])
+                        </div>
 
-                        <x-form-group name="import_only" :label="__('Only import?')" inline>
-                            <x-form-radio name="import_only" value="0" :label="__('No')" required />
-                            <x-form-radio name="import_only" value="1" :label="__('Yes')" required />
-                            @slot('help')
-                                <small class="form-text text-muted">
-                                    {{ __('If enabled, only admins can fill in details via import script') }}
-                                </small>
-                            @endslot
-                        </x-form-group>
+                        {{-- Only import? --}}
+                        <div class="form-group">
+                            <label>{{ __('Only import?') }}</label>
+                            <div class="d-flex flex-row flex-wrap">
+                                <div class="custom-control custom-radio mr-3">
+                                    <input type="radio" name="import_only" id="import_only_no" value="0" class="custom-control-input @error('import_only') is-invalid @enderror" {{ old('import_only', $event->import_only) == 0 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="import_only_no">{{ __('No') }}</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" name="import_only" id="import_only_yes" value="1" class="custom-control-input @error('import_only') is-invalid @enderror" {{ old('import_only', $event->import_only) == 1 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="import_only_yes">{{ __('Yes') }}</label>
+                                </div>
+                            </div>
+                            @include('partials.field-error', ['name' => 'import_only'])
+                            <small class="form-text text-muted">
+                                {{ __('If enabled, only admins can fill in details via import script') }}
+                            </small>
+                        </div>
 
-                        <x-form-group name="uses_times" :label="__('Show times?')" inline>
-                            <x-form-radio name="uses_times" value="0" :label="__('No')" required />
-                            <x-form-radio name="uses_times" value="1" :label="__('Yes')" required />
-                            @slot('help')
-                                <small class="form-text text-muted">
-                                    {{ __('If enabled, CTOT and ETA (if set in booking) will be shown') }}
-                                </small>
-                            @endslot
-                        </x-form-group>
+                        {{-- Show times? --}}
+                        <div class="form-group">
+                            <label>{{ __('Show times?') }}</label>
+                            <div class="d-flex flex-row flex-wrap">
+                                <div class="custom-control custom-radio mr-3">
+                                    <input type="radio" name="uses_times" id="uses_times_no" value="0" class="custom-control-input @error('uses_times') is-invalid @enderror" {{ old('uses_times', $event->uses_times) == 0 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="uses_times_no">{{ __('No') }}</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" name="uses_times" id="uses_times_yes" value="1" class="custom-control-input @error('uses_times') is-invalid @enderror" {{ old('uses_times', $event->uses_times) == 1 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="uses_times_yes">{{ __('Yes') }}</label>
+                                </div>
+                            </div>
+                            @include('partials.field-error', ['name' => 'uses_times'])
+                            <small class="form-text text-muted">
+                                {{ __('If enabled, CTOT and ETA (if set in booking) will be shown') }}
+                            </small>
+                        </div>
 
-                        <x-form-group name="multiple_bookings_allowed" :label="__('Multiple bookings allowed?')" inline>
-                            <x-form-radio name="multiple_bookings_allowed" value="0" :label="__('No')" required />
-                            <x-form-radio name="multiple_bookings_allowed" value="1" :label="__('Yes')" required />
-                            @slot('help')
-                                <small class="form-text text-muted">
-                                    {{ __('If enabled, a user is allowed to book multiple flights for this event') }}
-                                </small>
-                            @endslot
-                        </x-form-group>
+                        {{-- Multiple bookings allowed? --}}
+                        <div class="form-group">
+                            <label>{{ __('Multiple bookings allowed?') }}</label>
+                            <div class="d-flex flex-row flex-wrap">
+                                <div class="custom-control custom-radio mr-3">
+                                    <input type="radio" name="multiple_bookings_allowed" id="multiple_bookings_allowed_no" value="0" class="custom-control-input @error('multiple_bookings_allowed') is-invalid @enderror" {{ old('multiple_bookings_allowed', $event->multiple_bookings_allowed) == 0 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="multiple_bookings_allowed_no">{{ __('No') }}</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" name="multiple_bookings_allowed" id="multiple_bookings_allowed_yes" value="1" class="custom-control-input @error('multiple_bookings_allowed') is-invalid @enderror" {{ old('multiple_bookings_allowed', $event->multiple_bookings_allowed) == 1 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="multiple_bookings_allowed_yes">{{ __('Yes') }}</label>
+                                </div>
+                            </div>
+                            @include('partials.field-error', ['name' => 'multiple_bookings_allowed'])
+                            <small class="form-text text-muted">
+                                {{ __('If enabled, a user is allowed to book multiple flights for this event') }}
+                            </small>
+                        </div>
 
-                        <x-form-group name="is_oceanic_event" :label="__('Oceanic event?')" inline>
-                            <x-form-radio name="is_oceanic_event" value="0" :label="__('No')" required />
-                            <x-form-radio name="is_oceanic_event" value="1" :label="__('Yes')" required />
-                            @slot('help')
-                                <small class="form-text text-muted">
-                                    {{ __('If enabled, users can fill in a SELCAL code') }}
-                                </small>
-                            @endslot
-                        </x-form-group>
+                        {{-- Oceanic event? --}}
+                        <div class="form-group">
+                            <label>{{ __('Oceanic event?') }}</label>
+                            <div class="d-flex flex-row flex-wrap">
+                                <div class="custom-control custom-radio mr-3">
+                                    <input type="radio" name="is_oceanic_event" id="is_oceanic_event_no" value="0" class="custom-control-input @error('is_oceanic_event') is-invalid @enderror" {{ old('is_oceanic_event', $event->is_oceanic_event) == 0 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="is_oceanic_event_no">{{ __('No') }}</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" name="is_oceanic_event" id="is_oceanic_event_yes" value="1" class="custom-control-input @error('is_oceanic_event') is-invalid @enderror" {{ old('is_oceanic_event', $event->is_oceanic_event) == 1 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="is_oceanic_event_yes">{{ __('Yes') }}</label>
+                                </div>
+                            </div>
+                            @include('partials.field-error', ['name' => 'is_oceanic_event'])
+                            <small class="form-text text-muted">
+                                {{ __('If enabled, users can fill in a SELCAL code') }}
+                            </small>
+                        </div>
 
-                        <x-form-select name="dep" :label="__('Departure airport')" :options="$airports"
-                            :placeholder="__('Choose...')" required />
+                        {{-- Departure airport --}}
+                        <div class="form-group">
+                            <label for="dep">{{ __('Departure airport') }}</label>
+                            <select name="dep" id="dep" class="custom-select @error('dep') is-invalid @enderror" required>
+                                <option value="">{{ __('Choose...') }}</option>
+                                @foreach($airports as $icao => $name)
+                                    <option value="{{ $icao }}" {{ old('dep', $event->dep) == $icao ? 'selected' : '' }}>{{ $name }}</option>
+                                @endforeach
+                            </select>
+                            @include('partials.field-error', ['name' => 'dep'])
+                        </div>
 
-                        <x-form-select name="arr" :label="__('Arrival airport')" :options="$airports"
-                            :placeholder="__('Choose...')" required />
+                        {{-- Arrival airport --}}
+                        <div class="form-group">
+                            <label for="arr">{{ __('Arrival airport') }}</label>
+                            <select name="arr" id="arr" class="custom-select @error('arr') is-invalid @enderror" required>
+                                <option value="">{{ __('Choose...') }}</option>
+                                @foreach($airports as $icao => $name)
+                                    <option value="{{ $icao }}" {{ old('arr', $event->arr) == $icao ? 'selected' : '' }}>{{ $name }}</option>
+                                @endforeach
+                            </select>
+                            @include('partials.field-error', ['name' => 'arr'])
+                        </div>
 
-                        <x-form-group :label="__('Start event (UTC)')">
+                        {{-- Start event --}}
+                        <div class="form-group">
+                            <label>{{ __('Start event (UTC)') }}</label>
                             <x-flat-pickr name="startEvent" value="{{ old('startEvent', $event->startEvent) }}" />
-                        </x-form-group>
+                            @include('partials.field-error', ['name' => 'startEvent'])
+                        </div>
 
-                        <x-form-group :label="__('End event (UTC)')">
+                        {{-- End event --}}
+                        <div class="form-group">
+                            <label>{{ __('End event (UTC)') }}</label>
                             <x-flat-pickr name="endEvent" value="{{ old('endEvent', $event->endEvent) }}" />
-                        </x-form-group>
+                            @include('partials.field-error', ['name' => 'endEvent'])
+                        </div>
 
-                        <x-form-group :label="__('Start booking (UTC)')">
+                        {{-- Start booking --}}
+                        <div class="form-group">
+                            <label>{{ __('Start booking (UTC)') }}</label>
                             <x-flat-pickr name="startBooking" value="{{ old('startBooking', $event->startBooking) }}" />
-                        </x-form-group>
+                            @include('partials.field-error', ['name' => 'startBooking'])
+                        </div>
 
-                        <x-form-group :label="__('End booking (UTC)')">
+                        {{-- End booking --}}
+                        <div class="form-group">
+                            <label>{{ __('End booking (UTC)') }}</label>
                             <x-flat-pickr name="endBooking" value="{{ old('endBooking', $event->endBooking) }}" />
-                        </x-form-group>
+                            @include('partials.field-error', ['name' => 'endBooking'])
+                        </div>
 
-                        <x-form-input name="image_url" :label="__('Image URL')" placeholder="https://example.org" />
+                        {{-- Image URL --}}
+                        <div class="form-group">
+                            <label for="image_url">{{ __('Image URL') }}</label>
+                            <input type="text" name="image_url" id="image_url" value="{{ old('image_url', $event->image_url) }}" class="form-control @error('image_url') is-invalid @enderror" placeholder="https://example.org">
+                            @include('partials.field-error', ['name' => 'image_url'])
+                        </div>
 
-                        <x-form-input name="mail" :label="__('Event mail')" placeholder="urberealops@vatita.net" />
+                        {{-- Event mail --}}
+                        <div class="form-group">
+                            <label for="mail">{{ __('Event mail') }}</label>
+                            <input type="text" name="mail" id="mail" value="{{ old('mail', $event->mail) }}" class="form-control @error('mail') is-invalid @enderror" placeholder="urberealops@vatita.net">
+                            @include('partials.field-error', ['name' => 'mail'])
+                        </div>
 
-                        <x-form-textarea name="description" :label="__('Description')" class="tinymce" />
+                        {{-- Description --}}
+                        <div class="form-group">
+                            <label for="description">{{ __('Description') }}</label>
+                            <textarea name="description" id="description" class="form-control tinymce @error('description') is-invalid @enderror">{{ old('description', $event->description) }}</textarea>
+                            @include('partials.field-error', ['name' => 'description'])
+                        </div>
 
-                        <x-form-submit>
+                        <button type="submit" class="btn btn-primary">
                             @if ($event->id)
                                 <i class="fa fa-check"></i> {{ __('Edit') }}
                             @else
                                 <i class="fa fa-plus"></i> {{ __('Add') }}
                             @endif
-                        </x-form-submit>
-
-                        @endbind
-                    </x-form>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

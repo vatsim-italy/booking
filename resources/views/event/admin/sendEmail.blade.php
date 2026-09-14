@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-forms.alert />
+    @include('components.forms.alert', ['errors' => $errors])
     @include('layouts.alert')
     @push('scripts')
         <script>
@@ -75,57 +75,77 @@
 
                 <div class="card-body">
 
-                    <x-form :action="route('admin.events.email.final', $event)" method="PATCH">
-                        <x-form-group inline>
-                            <x-form-checkbox name="testmode1" id="testmode1" :label="__('Test mode')">
-                                @slot('help')
+                    <form action="{{ route('admin.events.email.final', $event) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <div class="form-group">
+                            <div class="d-flex flex-row flex-wrap">
+                                <div class="custom-control custom-checkbox mr-3">
+                                    <input type="checkbox" name="testmode1" id="testmode1" value="1" class="custom-control-input @error('testmode1') is-invalid @enderror">
+                                    <label class="custom-control-label" for="testmode1">{{ __('Test mode') }}</label>
                                     <small class="form-text text-muted">
                                         {{ __('Send a random Final Information E-mail to yourself') }}
                                     </small>
-                                @endslot
-                            </x-form-checkbox>
-                            <x-form-checkbox name="forceSend" :label="__('Send to everybody')">
-                                @slot('help')
+                                </div>
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" name="forceSend" id="forceSend" value="1" class="custom-control-input @error('forceSend') is-invalid @enderror">
+                                    <label class="custom-control-label" for="forceSend">{{ __('Send to everybody') }}</label>
                                     <small class="form-text text-muted">
                                         {{ __('Send to all particpants, even though they already received it (and no edit was made)') }}
                                     </small>
-                                @endslot
-                            </x-form-checkbox>
-                        </x-form-group>
-                        <x-form-submit class="send-final-email">
+                                </div>
+                            </div>
+                            @include('partials.field-error', ['name' => 'testmode1'])
+                            @include('partials.field-error', ['name' => 'forceSend'])
+                        </div>
+                        <button type="submit" class="btn btn-primary send-final-email">
                             <i class="fa fa-envelope"></i> {!! __('Send <strong>Final Information</strong> E-mail') !!}
-                        </x-form-submit>
-                    </x-form>
+                        </button>
+                    </form>
 
                     <hr>
 
-                    <x-form :action="route('admin.events.email', $event)" method="PATCH">
-                        <x-form-input name="subject" id="subject" :label="__('Subject')" required />
-                        <x-form-textarea name="message" :label="__('Message')" class="tinymce">
-                            @slot('help')
+                    <form action="{{ route('admin.events.email', $event) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        
+                        {{-- Subject --}}
+                        <div class="form-group">
+                            <label for="subject">{{ __('Subject') }}</label>
+                            <input type="text" name="subject" id="subject" value="{{ old('subject') }}" class="form-control @error('subject') is-invalid @enderror" required>
+                            @include('partials.field-error', ['name' => 'subject'])
+                        </div>
+
+                        {{-- Message --}}
+                        <div class="form-group">
+                            <label for="message">{{ __('Message') }}</label>
+                            <textarea name="message" id="message" class="form-control tinymce @error('message') is-invalid @enderror">{{ old('message') }}</textarea>
+                            <small class="form-text text-muted">
+                                {{ __('Salutation and closing are already included') }}
+                            </small>
+                            @include('partials.field-error', ['name' => 'message'])
+                        </div>
+
+                        {{-- Test mode --}}
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" name="testmode" id="testmode2" value="1" class="custom-control-input @error('testmode') is-invalid @enderror">
+                                <label class="custom-control-label" for="testmode2">{{ __('Test mode') }}</label>
                                 <small class="form-text text-muted">
-                                    {{ __('Salutation and closing are already included') }}
+                                    {{ __('Send a E-mail to yourself') }}
                                 </small>
-                            @endslot
-                        </x-form-textarea>
+                            </div>
+                            @include('partials.field-error', ['name' => 'testmode'])
+                        </div>
 
-                        <x-form-group>
-                            <x-form-checkbox name="testmode" id="testmode2" :label="__('Test mode')">
-                                @slot('help')
-                                    <small class="form-text text-muted">
-                                        {{ __('Send a E-mail to yourself') }}
-                                    </small>
-                                @endslot
-                            </x-form-checkbox>
-                        </x-form-group>
-
-                        <x-form-submit class="send-email">
+                        <button type="submit" class="btn btn-primary send-email">
                             <i class="fa fa-envelope"></i> {{ __('Send E-mail') }}
-                        </x-form-submit>
-                    </x-form>
+                        </button>
+                    </form>
 
                 </div>
             </div>
         </div>
     </div>
 @endsection
+

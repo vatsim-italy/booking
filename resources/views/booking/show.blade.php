@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-forms.alert />
+    @include('components.forms.alert', ['errors' => $errors])
 
     @push('scripts')
         <script>
@@ -41,205 +41,98 @@
                     <!-- Flight Information -->
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <x-form-group :label="__('Callsign')">
-                                <strong class="text-primary">{{ $booking->formatted_callsign }}</strong>
-                            </x-form-group>
+                            <div class="form-group">
+                                <label>{{ __('Callsign') }}</label>
+                                <p class="form-control-plaintext"><strong class="text-primary">{{ $booking->formatted_callsign }}</strong></p>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <x-form-group :label="__('Aircraft code')">
-                                <strong>{{ $booking->acType ?: 'N/A' }}</strong>
-                            </x-form-group>
+                            <div class="form-group">
+                                <label>{{ __('Aircraft code') }}</label>
+                                <p class="form-control-plaintext"><strong>{{ $booking->acType ?: 'N/A' }}</strong></p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Timing Information -->
                     @if($booking->event->uses_times)
                         <div class="row mb-4">
-                            @if($flight->ctot)
-                                <div class="col-md-6">
-                                    <x-form-group :label="__('STD')">
-                                        <strong>{{ $flight->formatted_ctot }}</strong>
-                                    </x-form-group>
-                                </div>
-                            @endif
-                            @if($flight->eta)
-                                <div class="col-md-6">
-                                    <x-form-group :label="__('STA')">
-                                        <strong>{{ $flight->formatted_eta }}</strong>
-                                    </x-form-group>
-                                </div>
-                            @endif
-                        </div>
-                    @endif
-
                     <!-- Airport Information -->
                     <div class="row mb-4">
                         @if($flight->dep)
                             <div class="col-md-6">
-                                <x-form-group :label="__('ADEP')">
-                                    <strong>{{ $flight->airportDep->icao }}</strong>
-                                    <small class="text-muted d-block">
-                                        {{ $flight->airportDep->name }}
-                                    </small>
-                                </x-form-group>
+                                <div class="form-group">
+                                    <label>{{ __('ADEP') }}</label>
+                                    <p class="form-control-plaintext"><strong>{{ $flight->airportDep->icao }} - {{ $flight->airportDep->name }}</strong></p>
+                                </div>
                             </div>
                         @endif
                         @if($flight->arr)
                             <div class="col-md-6">
-                                <x-form-group :label="__('ADES')">
-                                    <strong>{{ $flight->airportArr->icao }}</strong>
-                                    <small class="text-muted d-block">
-                                        {{ $flight->airportArr->name }}
-                                    </small>
-                                </x-form-group>
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Flight Details -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <x-form-group :label="__('PIC')">
-                                <strong>{{ $booking->user->pic }}</strong>
-                            </x-form-group>
-                        </div>
-                        <div class="col-md-6">
-                            <x-form-group :label="__('Route')">
-                                <strong>{{ $flight->route ?: '-' }}</strong>
-                            </x-form-group>
-                        </div>
-                    </div>
-
-                    @component('components.turnaround', [
-                        'fullRotation' => $fullRotation,
-                        'booking' => $booking
-                    ])
-                    @endcomponent
-
-                    <!-- Dispatch Options -->
-                    <div class="mb-4">
-                        <x-form-group :label="__('Flight Planning')">
-                            @php
-                                $simbriefUrl = 'https://dispatch.simbrief.com/options/custom?';
-                                preg_match('/^([A-Z]{2,3})(\d+).*$/', $booking->formatted_callsign, $matches);
-                                $airline = $matches[1] ?? '';
-                                $fltnum = $matches[2] ?? '';
-
-                                $params = [
-                                    'type' => $booking->acType,
-                                    'route' => $flight->route,
-                                    'airline' => $airline,
-                                    'fltnum' => $fltnum,
-                                    'orig' => $flight->airportDep->icao,
-                                    'dest' => $flight->airportArr->icao,
-                                    'callsign' => $booking->formatted_callsign,
-                                    'date' => $flight->ctot ? \Carbon\Carbon::parse($flight->ctot)->format('dMy') : null,
-                                    'deph'    => $flight->ctot ? \Carbon\Carbon::parse($flight->ctot)->format('H') : null,
-                                    'depm'    => $flight->ctot ? \Carbon\Carbon::parse($flight->ctot)->format('i') : null,
-                                ];
-                            @endphp
-
-                            <a href="{{ $simbriefUrl . http_build_query($params) }}"
-                               target="_blank" rel="noreferrer noopener"
-                               class="btn btn-outline-primary btn-sm d-inline-flex align-items-center">
-
-                                <i class="fas fa-file-export mr-2" aria-hidden="true"></i>
-                                {{ __('Open in SimBrief') }}
-                            </a>
-                            <small class="text-muted d-block mt-1">
-                                <i class="fas fa-magic mr-1" aria-hidden="true"></i>{{ __('Pre-filled with your flight details') }}
-                            </small>
-                        </x-form-group>
-                    </div>
-
-                    <!-- Oceanic Information -->
-                    @if($booking->event->is_oceanic_event)
-                        <div class="row mb-4">
-                            <div class="col-md-4">
-                                <x-form-group :label="__('Track')">
-                                    <strong>{{ $flight->oceanicTrack ?: 'T.B.D.' }}</strong>
-                                </x-form-group>
-                            </div>
-                            <div class="col-md-4">
-                                <x-form-group :label="__('Oceanic Entry FL')">
-                                    <strong>{{ $flight->formatted_oceanicfl }}</strong>
-                                </x-form-group>
-                            </div>
-                            <div class="col-md-4">
-                                <x-form-group :label="__('SELCAL')" inline>
-                                    <strong>{{ $flight->booking->formatted_selcal }}</strong>
-                                </x-form-group>
-                            </div>
-                        </div>
-                    @else
-                        @if($flight->oceanicFL)
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <x-form-group :label="__('Cruise FL')">
-                                        <strong>{{ $flight->formatted_oceanicfl }}</strong>
-                                    </x-form-group>
+                                <div class="form-group">
+                                    <label>{{ __('ADES') }}</label>
+                                    <p class="form-control-plaintext"><strong>{{ $flight->airportArr->icao }} - {{ $flight->airportArr->name }}</strong></p>
                                 </div>
                             </div>
                         @endif
-                    @endif
+                    </div>
 
+                    <!-- Route and Oceanic -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label>{{ __('Route') }}</label>
+                                <p class="form-control-plaintext"><strong>{{ $flight->route ?: '-' }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($booking->event->is_oceanic_event)
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{{ __('Track') }}</label>
+                                    <p class="form-control-plaintext"><strong>{{ $flight->oceanicTrack ?: 'T.B.D.' }}</strong></p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{{ __('Oceanic Entry FL') }}</label>
+                                    <p class="form-control-plaintext"><strong>{{ $flight->formatted_oceanicfl }}</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        @if ($flight->oceanicFL)
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ __('Cruise FL') }}</label>
+                                        <p class="form-control-plaintext"><strong>{{ $flight->formatted_oceanicfl }}</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     <!-- Airport Links -->
                     <div class="mb-4">
-                        <div class="section-header">
-                            <i class="fas fa-link" aria-hidden="true"></i>
-                            <h6>{{ __('Airport Resources') }}</h6>
-                        </div>
-
-                        <!-- if none of those conditions are met, show N/A-->
-                        @if(
-                            (!$flight->dep || !$flight->airportDep->links->count()) &&
-                            (!$booking->event->links->count()) &&
-                            (!$flight->arr || !$flight->airportArr->links->count())
-                        )
-                            <p class="text-muted mb-0">N/A</p>
-                        @endif
-
+                        <label class="d-block mb-3 border-bottom pb-2">{{ __('Airport Resources') }}</label>
                         <div class="row">
                             <!-- Departure Airport Links -->
                             @if($flight->dep && $flight->airportDep->links->count())
                                 <div class="col-md-6 mb-3 mb-md-0">
-                                    <div class="card h-100">
-                                        <div class="card-header py-2 d-flex align-items-center">
+                                    <div class="card h-100 shadow-sm border-0">
+                                        <div class="card-header py-2 d-flex align-items-center bg-transparent border-bottom-0">
                                             <i class="fas fa-plane-departure text-primary mr-2" aria-hidden="true"></i>
                                             <strong>{{ __('Departure') }} ({{ $flight->airportDep->icao }})</strong>
                                         </div>
-                                        <ul class="list-group list-group-flush">
+                                        <ul class="list-group list-group-flush border-top">
                                             @foreach($flight->airportDep->links as $link)
-                                                <li class="list-group-item py-2">
+                                                <li class="list-group-item py-2 border-0 pl-4">
                                                     <a href="{{ $link->url }}"
                                                        rel="noreferrer noopener"
                                                        target="_blank"
                                                        class="text-decoration-none d-flex align-items-center">
-                                                        <i class="fas fa-external-link-alt mr-2 text-muted" aria-hidden="true"></i>
-                                                        <span>{{ $link->name ?: $link->type->name }}</span>
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if($booking->event->links->count())
-                                <div class="col-md-6 mb-3 mb-md-0">
-                                    <div class="card h-100">
-                                        <div class="card-header py-2 d-flex align-items-center">
-                                            <i class="fas fa-calendar-alt text-primary mr-2" aria-hidden="true"></i>
-                                            <strong>{{ __('Event Resources') }}</strong>
-                                        </div>
-                                        <ul class="list-group list-group-flush">
-                                            @foreach($booking->event->links as $link)
-                                                <li class="list-group-item py-2">
-                                                    <a href="{{ $link->url }}"
-                                                       rel="noreferrer noopener"
-                                                       target="_blank"
-                                                       class="text-decoration-none d-flex align-items-center">
-                                                        <i class="fas fa-external-link-alt mr-2 text-muted" aria-hidden="true"></i>
+                                                        <i class="fas fa-external-link-alt mr-2 text-muted small" aria-hidden="true"></i>
                                                         <span>{{ $link->name ?: $link->type->name }}</span>
                                                     </a>
                                                 </li>
@@ -252,19 +145,19 @@
                             <!-- Arrival Airport Links -->
                             @if($flight->arr && $flight->airportArr->links->count())
                                 <div class="col-md-6">
-                                    <div class="card h-100">
-                                        <div class="card-header py-2 d-flex align-items-center">
+                                    <div class="card h-100 shadow-sm border-0">
+                                        <div class="card-header py-2 d-flex align-items-center bg-transparent border-bottom-0">
                                             <i class="fas fa-plane-arrival text-primary mr-2" aria-hidden="true"></i>
                                             <strong>{{ __('Arrival') }} ({{ $flight->airportArr->icao }})</strong>
                                         </div>
-                                        <ul class="list-group list-group-flush">
+                                        <ul class="list-group list-group-flush border-top">
                                             @foreach($flight->airportArr->links as $link)
-                                                <li class="list-group-item py-2">
+                                                <li class="list-group-item py-2 border-0 pl-4">
                                                     <a href="{{ $link->url }}"
                                                        rel="noreferrer noopener"
                                                        target="_blank"
                                                        class="text-decoration-none d-flex align-items-center">
-                                                        <i class="fas fa-external-link-alt mr-2 text-muted" aria-hidden="true"></i>
+                                                        <i class="fas fa-external-link-alt mr-2 text-muted small" aria-hidden="true"></i>
                                                         <span>{{ $link->name ?: $link->type->name }}</span>
                                                     </a>
                                                 </li>
@@ -279,29 +172,55 @@
                     <!-- Notes -->
                     @if($flight->notes)
                         <div class="mb-4">
-                            <x-form-group :label="__('Notes')">
-                                <strong>{{ $flight->formatted_notes }}</strong>
-                            </x-form-group>
+                            <div class="form-group">
+                                <label>{{ __('Notes') }}</label>
+                                <p class="form-control-plaintext"><strong>{{ $flight->formatted_notes }}</strong></p>
+                            </div>
                         </div>
                     @endif
 
                     <!-- Action Buttons -->
                     <div class="d-flex flex-wrap pt-3 mt-4 border-top">
                         @if($booking->is_editable)
-                            <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-primary px-4 mr-2">
+                            <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-primary px-4 mr-2 mb-2 mb-md-0">
                                 <i class="fas fa-edit mr-2"></i>{{ __('Edit Booking') }}
                             </a>
                         @endif
 
-                        <button class="btn btn-danger px-4 cancel-booking" form="cancel-booking">
+                        <button class="btn btn-danger px-4 cancel-booking mb-2 mb-md-0" form="cancel-booking">
                             <i class="fas fa-times mr-2"></i>{{ __('Cancel Booking') }}
                         </button>
                     </div>
 
                     <!-- Hidden Cancel Form -->
-                    <x-form :action="route('bookings.cancel', $booking)" id="cancel-booking" method="PATCH" style="display: none;"></x-form>
+                    <form action="{{ route('bookings.cancel', $booking) }}" id="cancel-booking" method="POST" style="display: none;">
+                        @csrf
+                        @method('PATCH')
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+
+                    @endif
+
+                            @if($flight->ctot)
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ __('STD') }}</label>
+                                        <p class="form-control-plaintext"><strong>{{ $flight->formatted_ctot }}</strong></p>
+                                    </div>
+                                </div>
+                            @endif
+                            @if($flight->eta)
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ __('STA') }}</label>
+                                        <p class="form-control-plaintext"><strong>{{ $flight->formatted_eta }}</strong></p>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
