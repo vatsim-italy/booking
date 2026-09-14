@@ -1,20 +1,21 @@
-# Stage 1: Build frontend assets with Vite (requires Node 20.19+ / 22.12+ for Vite 8)
-FROM node:22-alpine AS frontend
+# Stage 1: Build frontend assets with bun
+FROM node:24-alpine AS frontend
 
 WORKDIR /app
 
-# Install JS deps first for better layer caching
-COPY package.json package-lock.json ./
-RUN npm ci
+RUN curl -fsSL https://bun.com/install | bash
+ENV PATH="${PATH}:/root/.bun/bin"
+
+# Install deps first for better layer caching
+COPY package.json bun.lockb ./
+RUN bun install
 
 # Copy only what Vite needs to build
 COPY vite.config.mjs ./
 COPY resources/ resources/
 COPY public/ public/
 
-# Theme colors for Sass ($envColor*) — same defaults as vite.config.mjs / .env.example.
-# Override at build time with e.g.:
-#   docker build --build-arg BOOTSTRAP_COLOR_PRIMARY=#123456 .
+# Theme colors for Sass ($envColor*) — override at build time if needed
 ARG BOOTSTRAP_COLOR_PRIMARY=#2C3E50
 ARG BOOTSTRAP_COLOR_SECONDARY=#95a5a6
 ARG BOOTSTRAP_COLOR_TERTIARY=#18BC9C
@@ -28,46 +29,43 @@ ENV BOOTSTRAP_COLOR_PRIMARY=$BOOTSTRAP_COLOR_PRIMARY \
     BOOTSTRAP_COLOR_WARNING=$BOOTSTRAP_COLOR_WARNING \
     BOOTSTRAP_COLOR_DANGER=$BOOTSTRAP_COLOR_DANGER
 
-RUN npm run build
+RUN bun run build
 
+# Stage 2: laravel-base runtime
+FROM ghcr.io/vatsim-italy/laravel-base:latest
 
-# Stage 2: Main application image with Apache and PHP (must satisfy composer.json: php ^8.4)
-FROM php:8.4-apache
+USER root
+WORKDIR /var/www
 
-# Enable Apache mods
-RUN a2enmod rewrite
+# Install nginx + extensions missing from laravel-base
+RUN apt-get update && apt-get install -y nginx \
+    && rm -rf /var/lib/apt/lists/* \
+    && docker-php-ext-install xml intl opcache
 
-# Install system dependencies (libicu-dev already present so we can enable intl too)
-RUN apt-get update && apt-get install -y \
-    git unzip zip libzip-dev libpng-dev libonig-dev libxml2-dev \
-    libpq-dev libjpeg-dev libfreetype6-dev libicu-dev g++ ca-certificates \
-    && docker-php-ext-install pdo pdo_mysql zip gd mbstring xml bcmath opcache pcntl intl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install PHP dependencies first (cache layer)
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --prefer-dist \
+    --no-interaction
 
-# Copy Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# Copy Apache config
-COPY ./apache/000-default.conf /etc/apache2/sites-available/000-default.conf
-
-# Set working directory
-WORKDIR /var/www/html
-
-# Copy app files (vendor/ + node_modules/ excluded via .dockerignore)
+# Copy Laravel app
 COPY . .
 
-# Copy built frontend assets (Vite manifest + hashed bundles in public/build)
-COPY --from=frontend /app/public/build/ /var/www/html/public/build/
+# Copy built assets
+COPY --from=frontend /app/public/build public/build
 
-# Ensure Laravel cache paths exist and are writable
-RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
-    && chown -R www-data:www-data bootstrap storage \
-    && chmod -R 755 bootstrap storage
+# Laravel permissions
+RUN mkdir -p storage bootstrap/cache \
+    && chown -R www-data:www-data /var/www \
+    && chmod -R 775 storage bootstrap/cache
 
-# Laravel setup (no package:discover cache surprise — it must run on container start,
-# after the real .env is mounted; see docker-compose command below)
-RUN composer install --no-dev --optimize-autoloader \
-    && php artisan storage:link \
-    && rm -f bootstrap/cache/*.php
+# Copy nginx config
+COPY docker/nginx/default.conf /etc/nginx/sites-available/default
 
-EXPOSE 80
+CMD sh -c "\
+  until php artisan db:monitor; do echo 'Waiting for DB...'; sleep 2; done && \
+  service nginx start && \
+  php artisan schedule:work & \
+  php-fpm -F"
