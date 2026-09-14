@@ -32,10 +32,6 @@
             'resources/js/tinymce.js',
         ])
     @endif
-        
-    @if (request()->routeIs('atc*'))
-        <script src="{{ mix('js/fullcalendar.js') }}"></script>
-    @endif
 </head>
 
 <body>
