@@ -8,6 +8,8 @@
 /public/hot
 /public/storage
 /public/js
+/public/build
+/public/vendor
 /public/css
 /public/mix-manifest.json
 /storage/*.key
