@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-forms.alert />
+    @include('components.forms.alert', ['errors' => $errors])
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">

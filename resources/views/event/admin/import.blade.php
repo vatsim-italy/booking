@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-forms.alert />
+    @include('components.forms.alert', ['errors' => $errors])
     @include('layouts.alert')
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -9,38 +9,46 @@
                 <div class="card-header">{{ $event->name }} | {{ __('Import') }}</div>
 
                 <div class="card-body">
-                    <x-form :action="route('admin.bookings.import', $event)" method="POST" enctype="multipart/form-data">
-                        <x-form-input name="file" type="file" :label="__('File')" />
+                    <form action="{{ route('admin.bookings.import', $event) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        {{-- File --}}
+                        <div class="form-group">
+                            <label for="file">{{ __('File') }}</label>
+                            <input type="file" name="file" id="file" class="form-control-file @error('file') is-invalid @enderror">
+                            @include('partials.field-error', ['name' => 'file'])
+                        </div>
 
-                        <x-form-group :label="__('Headers in <strong>bold</strong> are mandatory')">
-                            @if ($event->event_type_id == \App\Enums\EventType::MULTIFLIGHTS->value)
-                                <strong><abbr title="[hh:mm]">CTOT 1</abbr></strong> - <strong><abbr title="[ICAO]">Airport
-                                        1</abbr></strong> -
-                                <strong><abbr title="[hh:mm]">CTOT 2</abbr></strong> - <strong><abbr title="[ICAO]">Airport
-                                        2</abbr></strong> -
-                                <strong><abbr title="[ICAO]">Airport 3</abbr></strong>
-                            @else
-                                Call Sign | <strong><abbr title="[ICAO]">Origin</abbr></strong> |
-                                <strong><abbr title="[ICAO]">Destination</abbr></strong> |
-                                <abbr title="[hh:mm]">CTOT</abbr> | <abbr title="[hh:mm]">ETA</abbr> |
-                                <abbr title="[ICAO]">Aircraft Type</abbr> | Route | Notes | Track | <abbr
-                                    title="Max 3 numbers. Examples: 370">FL</abbr>
-                            @endif
-                        </x-form-group>
+                        <div class="form-group">
+                            <label>{!! __('Headers in <strong>bold</strong> are mandatory') !!}</label>
+                            <p class="form-control-plaintext">
+                                @if ($event->event_type_id == \App\Enums\EventType::MULTIFLIGHTS->value)
+                                    <strong><abbr title="[hh:mm]">CTOT 1</abbr></strong> - <strong><abbr title="[ICAO]">Airport 1</abbr></strong> -
+                                    <strong><abbr title="[hh:mm]">CTOT 2</abbr></strong> - <strong><abbr title="[ICAO]">Airport 2</abbr></strong> -
+                                    <strong><abbr title="[ICAO]">Airport 3</abbr></strong>
+                                @else
+                                    Call Sign | <strong><abbr title="[ICAO]">Origin</abbr></strong> |
+                                    <strong><abbr title="[ICAO]">Destination</abbr></strong> |
+                                    <abbr title="[hh:mm]">CTOT</abbr> | <abbr title="[hh:mm]">ETA</abbr> |
+                                    <abbr title="[ICAO]">Aircraft Type</abbr> | Route | Notes | Track | <abbr
+                                        title="Max 3 numbers. Examples: 370">FL</abbr>
+                                @endif
+                            </p>
+                        </div>
 
-                        <x-form-group inline>
-                            <x-form-submit>
+                        <div class="form-group d-flex align-items-center">
+                            <button type="submit" class="btn btn-primary mr-2">
                                 <i class="fas fa-check"></i> Import
-                            </x-form-submit>
+                            </button>
 
                             <a class="btn btn-secondary"
                                 href="{{ $event->event_type_id == \App\Enums\EventType::MULTIFLIGHTS->value ? url('import_multi_flights_template.xlsx') : url('import_template.xlsx') }}">
                                 <i class="fas fa-file-excel"></i> Download template
                             </a>
-                        </x-form-group>
-                    </x-form>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+

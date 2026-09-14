@@ -97,7 +97,6 @@
                                 {{ __('Including emails') }}</a>
                         @endif
                     </div>
-
                     @if ($event->event_type_id == \App\Enums\EventType::MULTIFLIGHTS->value)
                         <a href="{{ route('admin.bookings.routeAssignForm', $event) }}" class="btn btn-primary m-1"><i
                                 class="fa fa-edit"></i> {{ __('Assign Routes') }}</a>&nbsp;
@@ -114,17 +113,22 @@
             </td>
             </tr>
 
-            <x-form :action="route('admin.events.delete-bookings', $event)" id="delete-bookings-{{ $event->id }}"
-                method="DELETE" style="display: none;"></x-form>
-            <x-form :action="route('admin.events.destroy', $event)" id="delete-event-{{ $event->id }}" method="DELETE"
-                style="display: none;"></x-form>
+            <form action="{{ route('admin.events.delete-bookings', $event) }}" id="delete-bookings-{{ $event->id }}" method="POST" style="display: none;">
+                @csrf
+                @method('DELETE')
+            </form>
+            <form action="{{ route('admin.events.destroy', $event) }}" id="delete-event-{{ $event->id }}" method="POST" style="display: none;">
+                @csrf
+                @method('DELETE')
+            </form>
         @empty
             @php
                 flashMessage('info', 'No events found', 'No events are in the system, consider adding one, using the button above');
             @endphp
             @include('layouts.alert')
         @endforelse
-        {{ $events->links() }}
     </table>
     {{ $events->links() }}
 @endsection
+
+

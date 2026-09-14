@@ -57,36 +57,38 @@
                 <th scope="row" colspan="2">Actions</th>
             </tr>
         </thead>
-        @foreach ($airports as $airport)
-            <tr>
-                <td><a href="{{ route('admin.airports.show', $airport) }}">{{ $airport->icao }}</a></td>
-                <td><a href="{{ route('admin.airports.show', $airport) }}">{{ $airport->iata }}</a></td>
-                <td><a href="{{ route('admin.airports.show', $airport) }}">{{ $airport->name }}</a></td>
-                <td>
-                    <a href="{{ route('admin.airports.edit', $airport) }}">
-                        <button class="btn btn-primary">
-                            <i class="fa fa-edit"></i> Edit Airport
-                        </button>
-                    </a>
-                </td>
-                <td>
-                    @if ($airport->flightsDep->isEmpty() && $airport->flightsArr->isEmpty() && $airport->eventDep->isEmpty() && $airport->eventArr->isEmpty())
-                        <form action="{{ route('admin.airports.destroy', $airport) }}" method="post">
-                            @method('DELETE')
-                            <button class="btn btn-danger delete-airport"><i class="fa fa-trash"></i> Remove Airport
+        <tbody>
+            @foreach ($airports as $airport)
+                <tr>
+                    <td><a href="{{ route('admin.airports.show', $airport) }}">{{ $airport->icao }}</a></td>
+                    <td><a href="{{ route('admin.airports.show', $airport) }}">{{ $airport->iata }}</a></td>
+                    <td><a href="{{ route('admin.airports.show', $airport) }}">{{ $airport->name }}</a></td>
+                    <td>
+                        <a href="{{ route('admin.airports.edit', $airport) }}">
+                            <button class="btn btn-primary">
+                                <i class="fa fa-edit"></i> Edit Airport
                             </button>
-                            @csrf
-                        </form>
-                    @else
-                        <button class="btn btn-danger disabled" disabled><i class="fa fa-trash"></i> Remove Airport
-                        </button>
-                    @endif
-                </td>
-            </tr>
-        @endforeach
-        {{ $airports->links() }}
+                        </a>
+                    </td>
+                    <td>
+                        @if ($airport->flightsDep->isEmpty() && $airport->flightsArr->isEmpty() && $airport->eventDep->isEmpty() && $airport->eventArr->isEmpty())
+                            <form action="{{ route('admin.airports.destroy', $airport) }}" method="post">
+                                @method('DELETE')
+                                <button class="btn btn-danger delete-airport"><i class="fa fa-trash"></i> Remove Airport
+                                </button>
+                                @csrf
+                            </form>
+                        @else
+                            <button class="btn btn-danger disabled" disabled><i class="fa fa-trash"></i> Remove Airport
+                            </button>
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
     </table>
     {{ $airports->links() }}
-    <x-form :action="route('admin.airports.destroyUnused')" id="delete-unused-airports" method="POST"
-        style="display: none;"></x-form>
+    <form action="{{ route('admin.airports.destroyUnused') }}" method="POST" id="delete-unused-airports" style="display: none;">
+        @csrf
+    </form>
 @endsection

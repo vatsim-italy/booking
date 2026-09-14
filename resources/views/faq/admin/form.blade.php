@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-forms.alert />
+    @include('components.forms.alert', ['errors' => $errors])
     @include('layouts.alert')
     @push('scripts')
         <script>
@@ -28,28 +28,50 @@
                 <div class="card-header">{{ $faq->id ? 'Edit' : 'Add new' }} FAQ</div>
 
                 <div class="card-body">
-                    <x-form :action="$faq->id ? route('admin.faq.update', $faq) : route('admin.faq.store')"
-                        :method="$faq->id ? 'PATCH' : 'POST'">
-                        @bind($faq)
-                        <x-form-group name="is_online" :label="__('Is online')" inline>
-                            <x-form-radio name="is_online" value="0" :label="__('No')" required />
-                            <x-form-radio name="is_online" value="1" :label="__('Yes')" required />
-                        </x-form-group>
+                    <form action="{{ $faq->id ? route('admin.faq.update', $faq) : route('admin.faq.store') }}" method="POST">
+                        @csrf
+                        @if($faq->id)
+                            @method('PATCH')
+                        @endif
 
-                        <x-form-input name="question" :label="__('Question')" required />
+                        {{-- Is online --}}
+                        <div class="form-group">
+                            <label>{{ __('Is online') }}</label>
+                            <div class="d-flex flex-row flex-wrap">
+                                <div class="custom-control custom-radio mr-3">
+                                    <input type="radio" name="is_online" id="is_online_no" value="0" class="custom-control-input @error('is_online') is-invalid @enderror" {{ old('is_online', $faq->is_online) == 0 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="is_online_no">{{ __('No') }}</label>
+                                </div>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" name="is_online" id="is_online_yes" value="1" class="custom-control-input @error('is_online') is-invalid @enderror" {{ old('is_online', $faq->is_online) == 1 ? 'checked' : '' }} required>
+                                    <label class="custom-control-label" for="is_online_yes">{{ __('Yes') }}</label>
+                                </div>
+                            </div>
+                            @include('partials.field-error', ['name' => 'is_online'])
+                        </div>
 
-                        <x-form-textarea name="answer" :label="__('Answer')" class="tinymce" />
+                        {{-- Question --}}
+                        <div class="form-group">
+                            <label for="question">{{ __('Question') }}</label>
+                            <input type="text" name="question" id="question" value="{{ old('question', $faq->question) }}" class="form-control @error('question') is-invalid @enderror" required>
+                            @include('partials.field-error', ['name' => 'question'])
+                        </div>
 
-                        <x-form-submit>
+                        {{-- Answer --}}
+                        <div class="form-group">
+                            <label for="answer">{{ __('Answer') }}</label>
+                            <textarea name="answer" id="answer" class="form-control tinymce @error('answer') is-invalid @enderror">{{ old('answer', $faq->answer) }}</textarea>
+                            @include('partials.field-error', ['name' => 'answer'])
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
                             @if ($faq->id)
                                 <i class="fa fa-check"></i> {{ __('Edit') }}
                             @else
                                 <i class="fa fa-plus"></i> {{ __('Add') }}
                             @endif
-                        </x-form-submit>
-                        @endbind
-                    </x-form>
-
+                        </button>
+                    </form>
                 </div>
 
                 @if ($faq->id)
@@ -91,3 +113,4 @@
         </div>
     </div>
 @endsection
+
