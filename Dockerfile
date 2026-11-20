@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Stage 1: PHP extensions
-FROM php:8.5-apache AS ext
+FROM php:8.4-apache AS ext
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends libzip-dev libpng-dev libjpeg-dev libfreetype6-dev; \
@@ -41,7 +41,7 @@ RUN npm run build
 
 
 # Stage 4: final runtime image
-FROM php:8.5-apache
+FROM php:8.4-apache
 COPY --from=ext /runtime-deps.txt /runtime-deps.txt
 RUN set -eux; \
     apt-get update; \
