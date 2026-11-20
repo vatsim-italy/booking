@@ -24,7 +24,9 @@ COPY app/Helper.php app/Helper.php
 RUN --mount=type=cache,target=/root/.composer/cache \
     composer install --no-dev --no-scripts --no-autoloader --no-interaction --no-progress
 COPY . .
-RUN composer dump-autoload --no-dev --optimize --no-interaction
+# storage/ is dockerignored, but package:discover boots providers that need the Blade cache path
+RUN mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions storage/logs bootstrap/cache \
+    && composer dump-autoload --no-dev --optimize --no-interaction
 
 
 # Stage 3: frontend assets. Copy only what the build reads, so PHP-only changes reuse this layer.
