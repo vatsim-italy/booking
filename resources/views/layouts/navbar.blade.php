@@ -109,9 +109,6 @@
                             @endif
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownUser">
-                            @can('report', auth()->user())
-                                 <a class="dropdown-item {{ request()->routeIs('atc.show') ? 'active' : '' }}" href="{{ route('atc.show') }}">{{ __('My availability') }}</a>
-                            @endcan
                             <a class="dropdown-item {{ request()->routeIs('user.settings') ? 'active' : '' }}"
                                 href="{{ route('user.settings') }}">{{ __('My settings') }}</a>
                             <a class="dropdown-item" href="{{ route('logout') }}">{{ __('Log out') }}</a>

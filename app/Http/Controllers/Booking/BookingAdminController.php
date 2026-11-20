@@ -334,20 +334,4 @@ class BookingAdminController extends AdminController
         flashMessage('success', __('Routes assigned'), __('Routes have been assigned to flights'));
         return to_route('bookings.event.index', $event);
     }
-
-    public function showEventAvailability(Event $event, Request $request)
-    {
-        $query = $event->availabilities()->with('user');
-        
-        // Optional filter by rating
-        if ($request->filled('rating')) {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('rating', $request->rating);
-            });
-        }
-
-        $availabilities = $query->orderBy('start')->get();
-
-        return view('booking.admin.availability', compact('event', 'availabilities'));
-    }
 }

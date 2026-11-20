@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\ATC\ATCController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Faq\FaqController;
 use App\Http\Controllers\User\UserController;
@@ -78,8 +77,6 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin', 'middleware' => 'auth.isAdm
         '{event}/bookings/route-assign',
         [BookingAdminController::class, 'routeAssign']
     )->name('bookings.routeAssign');
-
-    Route::get('events/{event}/availabilities', [BookingAdminController::class, 'showEventAvailability'])->name('booking.admin.availabilities');
 });
 
 Route::resource('bookings', BookingController::class)->only(['show', 'edit', 'update']);
@@ -89,10 +86,6 @@ Route::get('/bookings/{booking}/edit', [BookingController::class, 'edit'])
 Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 
 Route::get('faq', FaqController::class)->name('faq');
-
-Route::get('atc', ATCController::class)->name('atc.show');
-Route::post('atc', [ATCController::class, 'save'])->name('atc.save');
-Route::delete('atc', [ATCController::class, 'delete'])->name('atc.delete');
 
 Route::get('{event}', EventController::class)->name('events.show');
 

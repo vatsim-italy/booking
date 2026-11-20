@@ -139,9 +139,4 @@ class User extends Authenticatable
 
         return $token;
     }
-
-    public function availability()
-    {
-        return $this->hasMany(Availability::class, 'user_id');
-    }
 }
