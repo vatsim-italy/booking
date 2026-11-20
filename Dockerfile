@@ -1,5 +1,5 @@
 # Stage 1: Build frontend assets
-FROM node:18-alpine as frontend
+FROM node:24-alpine as frontend
 
 WORKDIR /app
 COPY . .
@@ -11,7 +11,7 @@ RUN npm run build
 
 
 # Stage 2: Main application image with Apache and PHP
-FROM php:8.2-apache
+FROM php:8.5-apache
 
 # Enable Apache mods
 RUN a2enmod rewrite
