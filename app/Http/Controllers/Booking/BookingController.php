@@ -12,8 +12,10 @@ use App\Http\Requests\Booking\UpdateBooking;
 use App\Models\Airport;
 use App\Models\Booking;
 use App\Models\Event;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -62,7 +64,8 @@ class BookingController extends Controller
 
         $fullRotation = $booking->getFullRotation();
 
-        if ($booking->is_request_slot) {
+        $isRequestSlot = $booking->is_request_slot;
+        if ($isRequestSlot) {
             $airports = Airport::all(['id', 'icao', 'name'])
             ->keyBy('id')
             ->map(fn($a) => [
@@ -78,16 +81,33 @@ class BookingController extends Controller
         }
 
 
-        // Reserve booking
-        activity()->by($user)->on($booking)->log('Flight reserved');
-        $booking->status = BookingStatus::RESERVED;
-        $booking->user()->associate($user)->save();
+        // Reserve booking. Re-check on locked rows so two users (or two tabs of one user) can't claim at once.
+        $reserved = DB::transaction(function () use ($booking, $user) {
+            User::whereKey($user->id)->lockForUpdate()->first();
+            $fresh = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            $user->unsetRelation('bookings');
+
+            if (! $user->can('book', $fresh)) {
+                return false;
+            }
+
+            activity()->by($user)->on($fresh)->log('Flight reserved');
+            $fresh->status = BookingStatus::RESERVED;
+            $fresh->user()->associate($user)->save();
+
+            return true;
+        });
+
+        if (! $reserved) {
+            return $this->redirectWithMessage('danger', 'Warning', 'This slot has already been taken.', $booking);
+        }
+        $booking->refresh();
 
         flashMessage('info', __('Slot reserved'), __('Slot remains reserved until :time', [
             'time' => $booking->updated_at->addMinutes(10)->format('Hi').'z',
         ]));
 
-        if ($booking->is_request_slot) {
+        if ($isRequestSlot) {
             return view('booking.request_reserved_slot', compact('booking', 'flight', 'airports'));
         }
 
@@ -96,6 +116,18 @@ class BookingController extends Controller
     }
 
     public function update(UpdateBooking $request, Booking $booking): RedirectResponse
+    {
+        // Lock the row so the reservation cleanup job can't free it mid-confirm.
+        return DB::transaction(function () use ($request, $booking) {
+            $booking = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+
+            abort_unless($booking->user_id === $request->user()->id, 403);
+
+            return $this->applyUpdate($request, $booking);
+        });
+    }
+
+    private function applyUpdate(UpdateBooking $request, Booking $booking): RedirectResponse
     {
         if ($booking->is_request_slot) {
 
@@ -149,7 +181,8 @@ class BookingController extends Controller
             if ($booking->status == BookingStatus::RESERVED) {
                 $booking->status = BookingStatus::BOOKED;
                 $booking->save();
-                event(new BookingConfirmed($booking));
+                // after commit: a mail/notification failure must not undo the confirmation
+                DB::afterCommit(fn () => event(new BookingConfirmed($booking)));
                 if (! Str::contains(config('mail.default'), ['log', 'array'])) {
                     $message = __('Your booking has been confirmed. You should shortly receive an email with your booking details. Be sure to also check your spam folder.');
                 } else {

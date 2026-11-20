@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\DB;
 
 class EventCleanupReservationsJob implements ShouldQueue
 {
@@ -38,11 +39,16 @@ class EventCleanupReservationsJob implements ShouldQueue
         $this->event->bookings()
             ->whereStatus(BookingStatus::RESERVED->value)
             ->each(function (Booking $booking) {
-                if (now()->greaterThanOrEqualTo($booking->updated_at->addMinutes(10))) {
-                    $booking->status = BookingStatus::UNASSIGNED;
-                    $booking->user_id = null;
-                    $booking->save();
-                }
+                // Re-read under lock: the user may have confirmed or renewed it since the query ran.
+                DB::transaction(function () use ($booking) {
+                    $booking = Booking::whereKey($booking->id)->lockForUpdate()->first();
+                    if ($booking?->status === BookingStatus::RESERVED
+                        && now()->greaterThanOrEqualTo($booking->updated_at->addMinutes(10))) {
+                        $booking->status = BookingStatus::UNASSIGNED;
+                        $booking->user_id = null;
+                        $booking->save();
+                    }
+                });
             });
     }
 }
