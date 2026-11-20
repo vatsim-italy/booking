@@ -57,7 +57,7 @@
             });
 
             // Reapply filters after Livewire re-render
-            document.addEventListener('livewire:update', applyFilters);
+            document.addEventListener('livewire:init', () => Livewire.hook('morphed', applyFilters));
         </script>
         @endpush
         @if(auth()->check() && auth()->user()->isAdmin && $event->endBooking >= now())

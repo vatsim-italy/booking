@@ -27,4 +27,4 @@ _ide_helper*\.php
 \.phpstorm\.meta\.php
 
 .phpunit.result.cache
-.phpunit.cache/test-results
+.phpunit.cache/

@@ -4,6 +4,9 @@ includes:
 parameters:
     paths:
         - app/
+    excludePaths:
+        # third-party code copied from protonemedia/laravel-form-components
+        - app/View/FormComponents/
 
     # The level 9 is the highest level
     level: 5

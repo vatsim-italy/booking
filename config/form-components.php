@@ -1,6 +1,6 @@
 <?php
 
-use ProtoneMedia\LaravelFormComponents\Components;
+use App\View\FormComponents\Components;
 
 return [
     'prefix' => '',
@@ -9,6 +9,9 @@ return [
     'framework' => 'bootstrap-4',
 
     'use_eloquent_date_casting' => false,
+
+    /** bool | string */
+    'default_wire' => false,
 
     'components' => [
         'form' => [
