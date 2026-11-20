@@ -15,6 +15,9 @@ require('laravel-mix-purgecss');
 
 require('dotenv').config();
 
+// explicit, so versioning works when public/ doesn't exist yet (Docker frontend stage)
+mix.setPublicPath('public');
+
 mix.js('resources/js/app.js', 'public/js')
     .js('resources/js/alpine.js', 'public/js')
     .js('resources/js/tinymce.js', 'public/js')
