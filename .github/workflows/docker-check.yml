@@ -1,0 +1,45 @@
+name: Docker build check
+
+on:
+  pull_request:
+    paths:
+      - Dockerfile
+      - Dockerfile.slim
+      - .dockerignore
+      - apache/**
+      - composer.json
+      - composer.lock
+      - package.json
+      - package-lock.json
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          load: true
+          tags: booking:pr
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Check PHP extensions
+        run: |
+          docker run --rm booking:pr php -m > modules.txt
+          for ext in pdo_mysql zip gd bcmath pcntl "Zend OPcache" mbstring xml dom; do
+            grep -qix "$ext" modules.txt || { echo "::error::missing PHP extension: $ext"; exit 1; }
+          done
+
+      - name: Check Laravel boots
+        run: docker run --rm -e APP_KEY=base64:$(openssl rand -base64 32) booking:pr php artisan --version
+
+      - name: Report image size
+        run: |
+          size=$(docker image inspect booking:pr --format '{{.Size}}')
+          echo "### Image size: $((size / 1024 / 1024)) MB" >> "$GITHUB_STEP_SUMMARY"
